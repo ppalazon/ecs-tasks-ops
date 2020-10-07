@@ -1,0 +1,10 @@
+{
+  "_template": "gh:cjolowicz/cookiecutter-hypermodern-python",
+  "author": "Pablo Palazon",
+  "email": "pablo.palazon@gmail.com",
+  "friendly_name": "Ecs Tasks Ops",
+  "github_user": "ppalazon",
+  "package_name": "ecs_tasks_ops",
+  "project_name": "ecs-tasks-ops",
+  "version": "0.1.0"
+}
