@@ -19,7 +19,7 @@ def main(ctx, debug, output_json) -> None:
 
 @main.command()
 @click.pass_context
-def cluster(ctx):
+def main_cluster(ctx):
     """Clusters information."""
     if not ctx.obj['OUT_JSON']:
         click.secho("Getting list of ECS cluster", fg="green")
@@ -33,15 +33,15 @@ def cluster(ctx):
 @main.command()
 @click.option('-c', '--cluster', default='default')
 @click.pass_context
-def services(ctx, cluster):
+def main_services(ctx, cluster_name):
     """Services defined in a cluster."""
-    click.secho(f"Getting list of Services for '{cluster}'", fg="green")
+    click.secho(f"Getting list of Services for '{cluster_name}'", fg="green")
     try:
-        services = ecs_facade.get_services(cluster)
+        services_info = ecs_facade.get_services(cluster_name)
         click.echo(pretty_table.tabulate_list_json_keys(
-            services, ['serviceArn', 'serviceName', 'status', 'runningCount', 'desiredCount']))
+            services_info, ['serviceArn', 'serviceName', 'status', 'runningCount', 'desiredCount']))
     except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
-        click.secho(f"Cluster {cluster} not found", fg="red")
+        click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
 
 
