@@ -5,22 +5,29 @@ from . import pretty_table
 
 
 @click.group()
-@click.option('--debug/--no-debug', default=False)
+@click.option('-x', '--debug/--no-debug', default=False)
+@click.option('-j', '--output-json', "output_json", is_flag=True, default=False)
 @click.version_option()
 @click.pass_context
-def main(ctx, debug) -> None:
+def main(ctx, debug, output_json) -> None:
     """Ecs Tasks Ops."""
     ctx.ensure_object(dict)
     ctx.obj['DEBUG'] = debug
+    ## TODO: Format output with json
+    ctx.obj['OUT_JSON'] = output_json
 
 
 @main.command()
 @click.pass_context
 def cluster(ctx):
     """Clusters information."""
-    click.secho("Getting list of ECS cluster", fg="green")
+    if not ctx.obj['OUT_JSON']:
+        click.secho("Getting list of ECS cluster", fg="green")
     clusters = ecs_facade.get_cluster_list()
-    click.echo(pretty_table.tabulate_list_json(clusters, fields_to=7))
+    if ctx.obj['OUT_JSON']:
+        click.echo(clusters)
+    else:
+        click.echo(pretty_table.tabulate_list_json(clusters, fields_to=7))
 
 
 @main.command()
