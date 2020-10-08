@@ -45,3 +45,10 @@ def test_tabulate_list_json_from_out_of_index():
     data = [{"foo": 1, "bar": "hi", "none": None}]
     out = pretty_table.tabulate_list_json(data, fields_to=4)
     assert tabulate(data, headers={"foo": "foo", "bar": "bar", "none": "none"}) == out
+
+
+def test_tabulate_list_json_keys():
+    data = [{"foo": 1, "bar": "hi", "none": None}]
+    data_test = [{"foo": 1, "none": None}]
+    out = pretty_table.tabulate_list_json_keys(data, keys=["foo", "none"])
+    assert tabulate(data_test, headers={"foo": "foo", "none": "none"}) == out
