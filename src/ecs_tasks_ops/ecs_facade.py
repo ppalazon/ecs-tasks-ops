@@ -13,8 +13,8 @@ def get_cluster_list():
     ).get('clusters', [])
 
 
-def get_services(cluster):
+def get_services(cluster_name):
     """Get information about all services defined in a cluster."""
-    list_services = ecs_client.list_services(cluster=cluster).get('serviceArns', [])
+    list_services = ecs_client.list_services(cluster=cluster_name).get('serviceArns', [])
     return ecs_client.describe_services(cluster=cluster, services=list_services).get('services', [])
 

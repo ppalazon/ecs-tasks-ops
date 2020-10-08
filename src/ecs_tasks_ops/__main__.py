@@ -17,9 +17,9 @@ def main(ctx, debug, output_json) -> None:
     ctx.obj['OUT_JSON'] = output_json
 
 
-@main.command()
+@main.command('clusters')
 @click.pass_context
-def main_cluster(ctx):
+def main_clusters(ctx):
     """Clusters information."""
     if not ctx.obj['OUT_JSON']:
         click.secho("Getting list of ECS cluster", fg="green")
@@ -30,8 +30,8 @@ def main_cluster(ctx):
         click.echo(pretty_table.tabulate_list_json(clusters, fields_to=7))
 
 
-@main.command()
-@click.option('-c', '--cluster', default='default')
+@main.command('services')
+@click.option('-c', '--cluster', default='default', help='Cluster name')
 @click.pass_context
 def main_services(ctx, cluster_name):
     """Services defined in a cluster."""
