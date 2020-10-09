@@ -244,4 +244,6 @@ dmypy.json
 .history
 .ionide
 
+*.orig
+
 # End of https://www.toptal.com/developers/gitignore/api/pycharm+all,python,visualstudiocode
