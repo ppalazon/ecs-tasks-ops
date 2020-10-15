@@ -3,9 +3,10 @@ import json
 import click
 import curses
 from curses import wrapper
+from . import ecs_data
 from . import ecs_facade
 from . import pretty_table
-from . import urwid_gui
+#from . import urwid_gui
 from .pretty_json import get_pretty_json_str
 
 
@@ -28,7 +29,7 @@ def main_clusters(ctx):
     """Clusters information."""
     if not ctx.obj['OUT_JSON']:
         click.secho("Getting list of ECS cluster", fg="green")
-    clusters = ecs_facade.get_cluster_list()
+    clusters = ecs_data.get_clusters()
     if ctx.obj['OUT_JSON']:
         click.echo(get_pretty_json_str(clusters))
     else:
@@ -42,7 +43,7 @@ def main_services(ctx, cluster_name):
     """Services defined in a cluster."""
     click.secho(f"Getting list of Services for '{cluster_name}'", fg="green")
     try:
-        services_info = ecs_facade.get_all_services(cluster_name)
+        services_info = ecs_data.get_services(cluster_name)
         if ctx.obj['OUT_JSON']:
             click.echo(get_pretty_json_str(services_info))
         else:
@@ -61,12 +62,12 @@ def main_container_instances(ctx, cluster_name):
     """Container instances defined in a cluster."""
     click.secho(f"Getting list of Container instances for '{cluster_name}'", fg="green")
     try:
-        container_instances_info = ecs_facade.get_all_container_instances(cluster_name)
+        container_instances_info = ecs_data.get_containers_instances(cluster_name)
         if ctx.obj['OUT_JSON']:
             click.echo(get_pretty_json_str(container_instances_info))
         else:
             click.echo(pretty_table.tabulate_list_json_keys(
-                container_instances_info, ['containerInstanceArn', 'ec2InstanceId', 'versionInfo']))
+                container_instances_info, ['ec2InstanceId', 'versionInfo']))
         
     except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
@@ -81,23 +82,49 @@ def main_tasks(ctx, cluster_name, service_name):
     """Set tasks defined in a cluster."""
     click.secho(f"Getting list of Tasks on '{cluster_name}' for '{service_name}'", fg="green")
     try:
-        tasks_info = ecs_facade.get_all_tasks(cluster_name, service_name)
+        tasks_info = ecs_data.get_tasks_service(cluster_name, service_name)
+        
         if ctx.obj['OUT_JSON']:
             click.echo(get_pretty_json_str(tasks_info))
         else:
             click.echo(pretty_table.tabulate_list_json_keys(
-                tasks_info, ['taskArn', 'containerInstanceArn', 'availabilityZone', 'memory', 'cpu', 'desiredStatus', 'healthStatus', 'lastStatus']))
+                tasks_info, ['taskArn', 'ec2InstanceId', 'availabilityZone', 'memory', 'cpu', 'desiredStatus', 'healthStatus', 'lastStatus']))
         
     except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
 
 
-@main.command('gui')
+@main.command('containers')
+@click.option('-c', '--cluster-name', default='default', help='Cluster name')
+@click.option('-s', '--service-name', default='', help='Service name')
+@click.option('-d', '--docker-name', help='Docker container name')
 @click.pass_context
-def main_urwid(ctx):
-    """Testing urwid gui."""
-    urwid_gui.main_gui()
+def main_containers(ctx, cluster_name, service_name, docker_name):
+    """Get docker containers defined in a cluster."""
+    click.secho(f"Getting docker containers on '{cluster_name}' for '{service_name}'", fg="green")
+    try:
+        containers_info = ecs_data.get_containers_service(cluster_name, service_name)
+
+        if docker_name:
+            containers_info = [c for c in containers_info if c['name'] == docker_name]
+
+        if ctx.obj['OUT_JSON']:
+            click.echo(get_pretty_json_str(containers_info))
+        else:
+            click.echo(pretty_table.tabulate_list_json_keys(
+                containers_info, ['image', 'ec2InstanceId', 'name', 'memory', 'cpu', 'runtimeId', 'healthStatus', 'lastStatus']))
+        
+    except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
+        click.secho(f"Cluster {cluster_name} not found", fg="red")
+        return []
+
+
+# @main.command('gui')
+# @click.pass_context
+# def main_urwid(ctx):
+#     """Testing urwid gui."""
+#     urwid_gui.main_gui()
 
 
 if __name__ == "__main__":
