@@ -1,7 +1,12 @@
 """Command-line interface."""
+import json
 import click
+import curses
+from curses import wrapper
 from . import ecs_facade
 from . import pretty_table
+from . import urwid_gui
+from .pretty_json import get_pretty_json_str
 
 
 @click.group()
@@ -25,25 +30,76 @@ def main_clusters(ctx):
         click.secho("Getting list of ECS cluster", fg="green")
     clusters = ecs_facade.get_cluster_list()
     if ctx.obj['OUT_JSON']:
-        click.echo(clusters)
+        click.echo(get_pretty_json_str(clusters))
     else:
         click.echo(pretty_table.tabulate_list_json(clusters, fields_to=7))
 
 
 @main.command('services')
-@click.option('-c', '--cluster', default='default', help='Cluster name')
+@click.option('-c', '--cluster-name', default='default', help='Cluster name')
 @click.pass_context
 def main_services(ctx, cluster_name):
     """Services defined in a cluster."""
     click.secho(f"Getting list of Services for '{cluster_name}'", fg="green")
     try:
-        services_info = ecs_facade.get_services(cluster_name)
-        click.echo(pretty_table.tabulate_list_json_keys(
-            services_info, ['serviceArn', 'serviceName', 'status', 'runningCount', 'desiredCount']))
+        services_info = ecs_facade.get_all_services(cluster_name)
+        if ctx.obj['OUT_JSON']:
+            click.echo(get_pretty_json_str(services_info))
+        else:
+            click.echo(pretty_table.tabulate_list_json_keys(
+                services_info, ['serviceArn', 'serviceName', 'status', 'runningCount', 'desiredCount']))
+        
     except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
 
 
+@main.command('container-instances')
+@click.option('-c', '--cluster-name', default='default', help='Cluster name')
+@click.pass_context
+def main_container_instances(ctx, cluster_name):
+    """Container instances defined in a cluster."""
+    click.secho(f"Getting list of Container instances for '{cluster_name}'", fg="green")
+    try:
+        container_instances_info = ecs_facade.get_all_container_instances(cluster_name)
+        if ctx.obj['OUT_JSON']:
+            click.echo(get_pretty_json_str(container_instances_info))
+        else:
+            click.echo(pretty_table.tabulate_list_json_keys(
+                container_instances_info, ['containerInstanceArn', 'ec2InstanceId', 'versionInfo']))
+        
+    except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
+        click.secho(f"Cluster {cluster_name} not found", fg="red")
+        return []
+
+
+@main.command('tasks')
+@click.option('-c', '--cluster-name', default='default', help='Cluster name')
+@click.option('-s', '--service-name', default='', help='Service name')
+@click.pass_context
+def main_tasks(ctx, cluster_name, service_name):
+    """Set tasks defined in a cluster."""
+    click.secho(f"Getting list of Tasks on '{cluster_name}' for '{service_name}'", fg="green")
+    try:
+        tasks_info = ecs_facade.get_all_tasks(cluster_name, service_name)
+        if ctx.obj['OUT_JSON']:
+            click.echo(get_pretty_json_str(tasks_info))
+        else:
+            click.echo(pretty_table.tabulate_list_json_keys(
+                tasks_info, ['taskArn', 'containerInstanceArn', 'availabilityZone', 'memory', 'cpu', 'desiredStatus', 'healthStatus', 'lastStatus']))
+        
+    except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
+        click.secho(f"Cluster {cluster_name} not found", fg="red")
+        return []
+
+
+@main.command('gui')
+@click.pass_context
+def main_urwid(ctx):
+    """Testing urwid gui."""
+    urwid_gui.main_gui()
+
+
 if __name__ == "__main__":
-    main(prog_name="ecs-tasks-ops")  # pragma: no cover
+    # main(prog_name="ecs-tasks-ops")  # pragma: no cover
+    pass
