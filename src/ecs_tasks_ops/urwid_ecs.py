@@ -153,7 +153,7 @@ class Task(EcsButton):
         self.cluster_identifier = cluster_identifier
 
     def retrieve_children(self):
-        return (None, [])
+        return (f"Docker Containers '{self.name}'", [DockerContainer(self.identifier, self.cluster_identifier, t['name'], t) for t in ecs_data.get_containers_tasks(self.cluster_identifier, self.detail['taskArn'])])
 
     def retrieve_important_details(self):
         return [('Status', self.detail['lastStatus']),
@@ -161,6 +161,36 @@ class Task(EcsButton):
                 ('Task Definition', self.detail['taskDefinitionArn']),
                 (['Container ', ('key', 'I'), 'nstance ID'], self.detail['containerInstanceArn'].split("/", 1)[1]),
                 ('Containers', '\n'.join(self.detail['networks']))]
+
+    def retrieve_by_highlight(self, key):
+        # if key is "I":
+        #     containers = ECS_CLIENT.retrieve_containers(self.cluster_identifier)
+        #     containers_by_id = dict((value[0]['containerInstanceArn'], value) for (key, value) in containers.iteritems())
+        #     return ("Containers", [Container(key, key.split("/")[1], self.cluster_identifier, value) for (key, value) in containers_by_id.iteritems()], self.detail['containerInstanceArn'].split("/", 1)[1])
+        # else:
+        return (None, [])
+
+
+class DockerContainer(EcsButton):
+
+    def __init__(self, task_identifier, cluster_identifier, identifier, detail):
+        super(DockerContainer, self).__init__(identifier, identifier, detail)
+        self.task_identifier = task_identifier
+        self.cluster_identifier = cluster_identifier
+
+    def retrieve_children(self):
+        return (None, [])
+
+    def retrieve_important_details(self):
+        return [('Container Arn', self.detail['containerArn']),
+                ('Status', self.detail['lastStatus']),
+                ('Health Status', self.detail['healthStatus']),
+                ('Docker id', self.detail['runtimeId']),
+                ('Docker Image', self.detail['image']),
+                ('CPU', self.detail['cpu']),
+                ('Memory Reservation', self.detail['memoryReservation']),
+                ('Instance ID', self.detail['ec2InstanceId']),
+                ('Networks', self.detail['networks'])]
 
     def retrieve_by_highlight(self, key):
         # if key is "I":

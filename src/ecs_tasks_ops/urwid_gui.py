@@ -48,8 +48,7 @@ class BodyController(object):
                 item.detail, indent=4, sort_keys=True, cls=DateTimeEncoder)
             lines = detail_text.split('\n')
             text_lines = [urwid.Text(l) for l in lines]
-            list_box = DetailListBox(
-                urwid.SimpleFocusListWalker(text_lines), self)
+            list_box = DetailListBox(urwid.SimpleFocusListWalker(text_lines), self)
             self.body = list_box
             LAYOUT.contents['body'] = (self.body, None)
             self.detail_view = True

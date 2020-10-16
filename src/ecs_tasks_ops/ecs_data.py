@@ -39,6 +39,11 @@ def improve_tasks_info(cluster_name, tasks):
     return tasks
 
 
+def improve_one_tasks_info(cluster_name, task_arn):
+    tasks = ecs_facade.get_describe_tasks(cluster_name, [task_arn])
+    return improve_tasks_info(cluster_name, tasks)
+
+
 def improve_service_tasks_info(cluster_name, service_name):
     tasks = ecs_facade.get_all_tasks_services(cluster_name, service_name)
     return improve_tasks_info(cluster_name, tasks)
@@ -58,6 +63,7 @@ def extract_docker_containers(task):
     containers = task.get('containers', [])
     for container in containers:
         container['ec2InstanceId'] = task.get('ec2InstanceId', '')
+        container['networks'] = extract_network_from_docker_container(container)
     return containers
 
 
@@ -73,7 +79,13 @@ def extract_network_from_docker_container(docker_container):
 
 
 def improve_docker_container_info(cluster_name, service_name):
-    tasks = get_tasks_service(cluster_name, service_name)
+    tasks = improve_service_tasks_info(cluster_name, service_name)
+    containers = list(chain.from_iterable([extract_docker_containers(task) for task in tasks]))
+    return containers
+
+
+def improve_docker_container_task_info(cluster_name, task_arn):
+    tasks = improve_one_tasks_info(cluster_name, task_arn)
     containers = list(chain.from_iterable([extract_docker_containers(task) for task in tasks]))
     return containers
 
@@ -104,3 +116,7 @@ def get_tasks_container_instance(cluster_name, containers_instance_arn):
 
 def get_containers_service(cluster_name, service_name):
     return ecs_data.setdefault(cluster_name+"."+service_name+".containers", improve_docker_container_info(cluster_name, service_name))
+
+
+def get_containers_tasks(cluster_name, task_arn):
+    return ecs_data.setdefault(cluster_name+"."+task_arn+".containers", improve_docker_container_task_info(cluster_name, task_arn))
