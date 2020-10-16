@@ -6,7 +6,7 @@ from curses import wrapper
 from . import ecs_data
 from . import ecs_facade
 from . import pretty_table
-#from . import urwid_gui
+from . import urwid_gui
 from .pretty_json import get_pretty_json_str
 
 
@@ -76,13 +76,21 @@ def main_container_instances(ctx, cluster_name):
 
 @main.command('tasks')
 @click.option('-c', '--cluster-name', default='default', help='Cluster name')
-@click.option('-s', '--service-name', default='', help='Service name')
+@click.option('-s', '--service-name', help='Service name')
+@click.option('-i', '--container-instance', help='Container instance')
 @click.pass_context
-def main_tasks(ctx, cluster_name, service_name):
+def main_tasks(ctx, cluster_name, service_name, container_instance):
     """Set tasks defined in a cluster."""
-    click.secho(f"Getting list of Tasks on '{cluster_name}' for '{service_name}'", fg="green")
     try:
-        tasks_info = ecs_data.get_tasks_service(cluster_name, service_name)
+        if not service_name and not container_instance:
+            click.secho(f"Getting list of Tasks on '{cluster_name}'", fg="green")
+            tasks_info = ecs_data.get_tasks_cluster(cluster_name)
+        elif service_name:
+            click.secho(f"Getting list of Tasks on '{cluster_name}' for '{service_name}'", fg="green")
+            tasks_info = ecs_data.get_tasks_service(cluster_name, service_name)
+        elif container_instance:
+            click.secho(f"Getting list of Tasks on '{cluster_name}' for '{container_instance}'", fg="green")
+            tasks_info = ecs_data.get_tasks_container_instance(cluster_name, container_instance)
         
         if ctx.obj['OUT_JSON']:
             click.echo(get_pretty_json_str(tasks_info))
@@ -120,11 +128,11 @@ def main_containers(ctx, cluster_name, service_name, docker_name):
         return []
 
 
-# @main.command('gui')
-# @click.pass_context
-# def main_urwid(ctx):
-#     """Testing urwid gui."""
-#     urwid_gui.main_gui()
+@main.command('gui')
+@click.pass_context
+def main_urwid(ctx):
+    """Testing urwid gui."""
+    urwid_gui.main_gui()
 
 
 if __name__ == "__main__":

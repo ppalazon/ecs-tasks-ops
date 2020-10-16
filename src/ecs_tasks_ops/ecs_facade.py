@@ -48,7 +48,16 @@ def get_all_container_instances(cluster_name):
     return containers_instances
 
 
-def get_all_tasks(cluster_name, service_name):
+def get_all_tasks_cluster(cluster_name):
+    """Get information about all tasks defined in a cluster for a service."""
+    list_tasks_arns = get_ecs_list('list_tasks', 'taskArns', cluster=cluster_name)
+    # Max request per describe_services are 100 services arns, so we slice them 100 by 100, and request each 100
+    slices = [slice(i, i+100, 1) for i in range(0, len(list_tasks_arns), 100)]
+    tasks = list(chain.from_iterable([get_describe_tasks(cluster_name, list_tasks_arns[slc]) for slc in slices]))
+    return tasks
+
+
+def get_all_tasks_services(cluster_name, service_name):
     """Get information about all tasks defined in a cluster for a service."""
     list_tasks_arns = get_ecs_list('list_tasks', 'taskArns', cluster=cluster_name, serviceName=service_name)
     # Max request per describe_services are 100 services arns, so we slice them 100 by 100, and request each 100
@@ -56,3 +65,11 @@ def get_all_tasks(cluster_name, service_name):
     tasks = list(chain.from_iterable([get_describe_tasks(cluster_name, list_tasks_arns[slc]) for slc in slices]))
     return tasks
 
+
+def get_all_tasks_container(cluster_name, container_arn):
+    """Get information about all tasks defined in a cluster for a service."""
+    list_tasks_arns = get_ecs_list('list_tasks', 'taskArns', cluster=cluster_name, containerInstance=container_arn)
+    # Max request per describe_services are 100 services arns, so we slice them 100 by 100, and request each 100
+    slices = [slice(i, i+100, 1) for i in range(0, len(list_tasks_arns), 100)]
+    tasks = list(chain.from_iterable([get_describe_tasks(cluster_name, list_tasks_arns[slc]) for slc in slices]))
+    return tasks
