@@ -1,22 +1,31 @@
 """Clean and improve ecs data json"""
 
 
-from . import ecs_facade
+from ecs_tasks_ops import ecs_facade
 from itertools import chain
 
 
 ecs_data = {}
 
 def improve_container_instance_info(cluster_name):
-    containers = ecs_facade.get_all_container_instances(cluster_name)
-    for c in containers:
-        attrs = c.get('attributes', [])
+    container_instances = ecs_facade.get_all_container_instances(cluster_name)
+    for ci in container_instances:
+        attrs = ci.get('attributes', [])
         attrs_vals = [a for a in attrs if 'value' in a]
-        c['features'] = [a['name'] for a in attrs if 'value' not in a]
+        ci['features'] = [a['name'] for a in attrs if 'value' not in a]
         for attr in attrs_vals:
-            c[attr['name']] = attr['value']
-        c['attributes'] = None
-    return containers
+            ci[attr['name']] = attr['value']
+        registered_resources = ci['registeredResources']
+        available_resources = ci['remainingResources']
+        ci['ami_id'] = next(obj for obj in attrs if obj['name'] == 'ecs.ami-id')['value']
+        ci['instance_type'] = next(obj for obj in attrs if obj['name'] == 'ecs.instance-type')['value']
+        ci['availability_zone'] = next(obj for obj in attrs if obj['name'] == 'ecs.availability-zone')['value']
+        ci['available_memory'] = next(obj for obj in available_resources if obj['name'] == 'MEMORY')['integerValue']
+        ci['total_memory'] = next(obj for obj in registered_resources if obj['name'] == 'MEMORY')['integerValue']
+        ci['available_cpu'] = next(obj for obj in available_resources if obj['name'] == 'CPU')['integerValue']
+        ci['total_cpu'] = next(obj for obj in registered_resources if obj['name'] == 'CPU')['integerValue']
+        ci['taken_ports'] = ", ".join(sorted(next(obj for obj in available_resources if obj['name'] == 'PORTS')['stringSetValue']))
+    return container_instances
 
 
 def improve_tasks_info(cluster_name, tasks):

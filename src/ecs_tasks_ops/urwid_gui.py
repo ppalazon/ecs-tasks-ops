@@ -6,8 +6,8 @@ import json
 from datetime import datetime
 import subprocess
 from urwid.command_map import ACTIVATE
-from .urwid_ecs import Cluster
-from . import ecs_data
+from ecs_tasks_ops.urwid_ecs import Cluster
+from ecs_tasks_ops import ecs_data
 
 
 class BodyController(object):
@@ -24,8 +24,7 @@ class BodyController(object):
         column_array = convert_details_to_columns(
             initial_buttons.items[0].retrieve_important_details())
 
-        self.cols = urwid.Columns(
-            [('weight', 1, column_array[0]), ('weight', 4, column_array[1])], )
+        self.cols = urwid.Columns([('weight', 1, column_array[0]), ('weight', 4, column_array[1])], )
         self.detail_view = False
         self.base_title_text = self.list_stack[-1].items_title
         self.title = urwid.AttrMap(urwid.Text(self.base_title_text + " " + self.EMPTY_FILTER_TEXT), 'title')
@@ -84,7 +83,7 @@ class BodyController(object):
         self.show_next_level(list_walker, current, current.highlighted)
 
     def show_next_level(self, list_walker, new_items, highlight_text=None):
-        if new_items:
+        if new_items and new_items.items_title:
             self.base_title_text = new_items.items_title
             self.title.base_widget.set_text(self.base_title_text + " " + self.EMPTY_FILTER_TEXT)
             list_walker.set_focus(0)
@@ -122,7 +121,7 @@ class BodyController(object):
 
         if not key_dealt_with:
             result = RefreshableItems(item.retrieve_by_highlight, key)
-            if len(result.items) is 0:
+            if len(result.items) == 0:
                 return key
             self.show_next_level(list_walker, result, highlight_text=result.highlighted)
 
@@ -190,7 +189,7 @@ def convert_details_to_columns(details):
     labels = []
     data = []
     for detail in details:
-        if type(detail[0]) is list:
+        if type(detail[0]) == list:
             labels.extend(detail[0])
         else:
             labels.append(detail[0])
@@ -210,7 +209,7 @@ class RefreshableItems():
         self.retrieval_method = retrieval_method
         self.method_args = method_args
         results = self.retrieval_method(*self.method_args)
-        if len(results) is 2:
+        if results and len(results) == 2:
             self.items_title, self.items = results
             self.highlighted = None
         else:
@@ -218,7 +217,7 @@ class RefreshableItems():
 
     def refresh(self):
         results = self.retrieval_method(*self.method_args)
-        if len(results) is 2:
+        if results and len(results) == 2:
             self.items_title, self.items = results
             self.highlighted = None
         else:
@@ -272,3 +271,5 @@ def main_gui():
     main_loop = urwid.MainLoop(LAYOUT, palette=PALETTE, unhandled_input=exit_on_cr)
     main_loop.run()
 
+if __name__ == '__main__':
+    main_gui()

@@ -3,11 +3,11 @@ import json
 import click
 import curses
 from curses import wrapper
-from . import ecs_data
-from . import ecs_facade
-from . import pretty_table
-from . import urwid_gui
-from .pretty_json import get_pretty_json_str
+from ecs_tasks_ops import ecs_data
+from ecs_tasks_ops import ecs_facade
+from ecs_tasks_ops import pretty_table
+from ecs_tasks_ops import urwid_gui
+from ecs_tasks_ops.pretty_json import get_pretty_json_str
 
 
 @click.group()

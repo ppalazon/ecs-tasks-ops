@@ -1,7 +1,7 @@
 """Urwid data conversor from ECS facade"""
 
 import urwid
-from . import ecs_data
+from ecs_tasks_ops import ecs_data
 
 
 class EcsButton(urwid.Button):
@@ -38,15 +38,15 @@ class Cluster(EcsButton):
                 ([('key',"C"), "ontainers"], self.detail['registeredContainerInstancesCount'])]
 
     def retrieve_children(self):
-        return ("Choose sub-resource", [TasksLabel(self.identifier), ServicesLabel(self.identifier), ContainersLabel(self.identifier)])
+        return (f"Cluster '{self.name}'", [TasksLabel(self.identifier), ServicesLabel(self.identifier), ContainersLabel(self.identifier)])
 
     def retrieve_by_highlight(self, key):
         if key == "T":
-            return ("Tasks", [Task(None, self.identifier, t['name'], t) for t in ecs_data.get_tasks_cluster(self.identifier)], None)
+            return (f"Tasks '{self.name}'", [Task(None, self.identifier, t['name'], t) for t in ecs_data.get_tasks_cluster(self.identifier)], None)
         if key == "S":
-            return ("Services", [Service(s['serviceArn'], s['serviceName'], self.identifier, s) for s in ecs_data.get_services(self.identifier)], None)
+            return (f"Services '{self.name}'", [Service(s['serviceArn'], s['serviceName'], self.identifier, s) for s in ecs_data.get_services(self.identifier)], None)
         if key == "C":
-            return ("Containers", [Container(c['containerInstanceArn'], c['ec2InstanceId'], self.identifier, c) for c in ecs_data.get_containers_instances(self.identifier)], None)
+            return (f"Containers '{self.name}'", [Container(c['containerInstanceArn'], c['ec2InstanceId'], self.identifier, c) for c in ecs_data.get_containers_instances(self.identifier)], None)
         else:
             return (None, [])
 
@@ -56,7 +56,7 @@ class TasksLabel(EcsButton):
         super(TasksLabel, self).__init__(cluster_identifier, "Tasks", "")
 
     def retrieve_children(self):
-        return ("Tasks", [Task(None, self.identifier, t['name'], t) for t in ecs_data.get_tasks_cluster(self.identifier)], None)
+        return (f"Tasks '{self.identifier}'", [Task(None, self.identifier, t['name'], t) for t in ecs_data.get_tasks_cluster(self.identifier)], None)
 
     def retrieve_important_details(self):
         return []
@@ -67,7 +67,7 @@ class ServicesLabel(EcsButton):
         super(ServicesLabel, self).__init__(cluster_identifier, "Services", "")
 
     def retrieve_children(self):
-        return ("Services", [Service(s['serviceArn'], s['serviceName'], self.identifier, s) for s in ecs_data.get_services(self.identifier)])
+        return (f"Services '{self.identifier}'", [Service(s['serviceArn'], s['serviceName'], self.identifier, s) for s in ecs_data.get_services(self.identifier)])
 
     def retrieve_important_details(self):
         return []
@@ -79,7 +79,7 @@ class ContainersLabel(EcsButton):
             cluster_identifier, "Containers", "")
 
     def retrieve_children(self):
-        return ("Containers", [Container(c['containerInstanceArn'], c['ec2InstanceId'], self.identifier, c) for c in ecs_data.get_containers_instances(self.identifier)], None)
+        return (f"Containers '{self.identifier}'", [Container(c['containerInstanceArn'], c['ec2InstanceId'], self.identifier, c) for c in ecs_data.get_containers_instances(self.identifier)], None)
 
     def retrieve_important_details(self):
         return []
@@ -92,51 +92,28 @@ class Container(EcsButton):
         self.cluster_identifier = cluster_identifier
 
     def retrieve_children(self):
-        return (None, None)
+        return (None, [])
 
     def retrieve_important_details(self):
-        # cont_detail = self.detail[0]
-        # attributes = cont_detail['attributes']
-        # registered_resources = cont_detail['registeredResources']
-        # available_resources = cont_detail['remainingResources']
-        # ami_id = next(
-        #     obj for obj in attributes if obj['name'] == 'ecs.ami-id')['value']
-        # instance_type = next(
-        #     obj for obj in attributes if obj['name'] == 'ecs.instance-type')['value']
-        # availability_zone = next(
-        #     obj for obj in attributes if obj['name'] == 'ecs.availability-zone')['value']
-        # available_memory = next(
-        #     obj for obj in available_resources if obj['name'] == 'MEMORY')['integerValue']
-        # total_memory = next(
-        #     obj for obj in registered_resources if obj['name'] == 'MEMORY')['integerValue']
-        # available_cpu = next(obj for obj in available_resources if obj['name'] == 'CPU')[
-        #     'integerValue']
-        # total_cpu = next(obj for obj in registered_resources if obj['name'] == 'CPU')[
-        #     'integerValue']
-        # taken_ports = ", ".join(sorted(next(
-        #     obj for obj in available_resources if obj['name'] == 'PORTS')['stringSetValue']))
-        # return [('Status', cont_detail['status']),
-        #         ('EC2 Instance Id', cont_detail['ec2InstanceId']),
-        #         (['Private ', ('key', 'I'), 'P'], self.detail[1]['PrivateIpAddress']),
-        #         ('Private DNS Name', self.detail[1]['PrivateDnsName']),
-        #         ('Public DNS Name', self.detail[1]['PublicDnsName']),
-        #         (['Running ', ('key','T'), 'asks'], cont_detail['runningTasksCount']),
-        #         ('Pending Tasks', cont_detail['pendingTasksCount']),
-        #         ('AMI Id', ami_id),
-        #         ('Instance Type', instance_type),
-        #         ('Availability Zone', availability_zone),
-        #         ('Memory', 'Available: ' + str(available_memory) +
-        #          " Total: " + str(total_memory)),
-        #         ('CPU', 'Available: ' + str(available_cpu) +
-        #          " Total: " + str(total_cpu)),
-        #         ('Taken ports', taken_ports)]
-        cont_detail = self.detail
-        return [('EC2 Instance Id', cont_detail['ec2InstanceId'])]
+        ci = self.detail
+        return [('Status', ci['status']),
+                ('EC2 Instance Id', ci['ec2InstanceId']),
+                # (['Private ', ('key', 'I'), 'P'], self.detail[1]['PrivateIpAddress']),
+                # ('Private DNS Name', self.detail[1]['PrivateDnsName']),
+                # ('Public DNS Name', self.detail[1]['PublicDnsName']),
+                (['Running ', ('key','T'), 'asks'], ci['runningTasksCount']),
+                ('Pending Tasks', ci['pendingTasksCount']),
+                ('AMI Id', ci['ami_id']),
+                ('Instance Type', ci['instance_type']),
+                ('Availability Zone', ci['availability_zone']),
+                ('Memory', 'Available: ' + str(ci['available_memory']) +" Total: " + str(ci['total_memory'])),
+                ('CPU', 'Available: ' + str(ci['available_cpu']) +" Total: " + str(ci['total_cpu'])),
+                ('Taken ports', ci['taken_ports'])]
 
 
     def retrieve_by_highlight(self, key):
         if key == "T":
-            return ("Tasks", [Task(self.identifier, self.cluster_identifier, t['name'], t) for t in ecs_data.get_tasks_container_instance(self.cluster_identifier, self.identifier)], None)
+            return (f"Tasks '{self.name}'", [Task(self.identifier, self.cluster_identifier, t['name'], t) for t in ecs_data.get_tasks_container_instance(self.cluster_identifier, self.identifier)], None)
         else:
             return (None, [])
 
@@ -144,7 +121,7 @@ class Container(EcsButton):
         # if key is "I":
         #     return ("SSH", self.detail[1]['PrivateIpAddress'])
         # else:
-        return (None, None)
+        return (None, [])
 
 class Service(EcsButton):
 
@@ -153,7 +130,7 @@ class Service(EcsButton):
         self.cluster_identifier = cluster_identifier
 
     def retrieve_children(self):
-        return ("Tasks", [Task(self.identifier, self.cluster_identifier, t['name'], t) for t in ecs_data.get_tasks_service(self.cluster_identifier, self.identifier)])
+        return (f"Tasks '{self.name}'", [Task(self.identifier, self.cluster_identifier, t['name'], t) for t in ecs_data.get_tasks_service(self.cluster_identifier, self.identifier)])
 
     def retrieve_important_details(self):
         deployment_config = self.detail['deploymentConfiguration']
@@ -176,14 +153,13 @@ class Task(EcsButton):
         self.cluster_identifier = cluster_identifier
 
     def retrieve_children(self):
-        return (None, None)
+        return (None, [])
 
     def retrieve_important_details(self):
         return [('Status', self.detail['lastStatus']),
                 ('Desired Status', self.detail['desiredStatus']),
                 ('Task Definition', self.detail['taskDefinitionArn']),
-                (['Container ', ('key', 'I'), 'nstance ID'],
-                 self.detail['containerInstanceArn'].split("/", 1)[1]),
+                (['Container ', ('key', 'I'), 'nstance ID'], self.detail['containerInstanceArn'].split("/", 1)[1]),
                 ('Containers', '\n'.join(self.detail['networks']))]
 
     def retrieve_by_highlight(self, key):
