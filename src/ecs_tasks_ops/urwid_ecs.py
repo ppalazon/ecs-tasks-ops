@@ -13,14 +13,17 @@ class EcsButton(urwid.Button):
         self.showing_detail = False
         super(EcsButton, self).__init__(name)
 
+    def retrieve_important_details(self):
+        return []
+
     def retrieve_children(self):
-        pass
+        return (None, [])
 
     def retrieve_by_highlight(self, key):
-        pass
+        return (None, [])
 
     def special_action(self, key):
-        return (None, None)
+        return (None, [])
 
     def contains_word(self, word):
         return word.lower() in self.name.lower()
@@ -58,9 +61,6 @@ class TasksLabel(EcsButton):
     def retrieve_children(self):
         return (f"Tasks '{self.identifier}'", [Task(None, self.identifier, t['name'], t) for t in ecs_data.get_tasks_cluster(self.identifier)], None)
 
-    def retrieve_important_details(self):
-        return []
-
 
 class ServicesLabel(EcsButton):
     def __init__(self, cluster_identifier):
@@ -68,9 +68,6 @@ class ServicesLabel(EcsButton):
 
     def retrieve_children(self):
         return (f"Services '{self.identifier}'", [Service(s['serviceArn'], s['serviceName'], self.identifier, s) for s in ecs_data.get_services(self.identifier)])
-
-    def retrieve_important_details(self):
-        return []
 
 
 class ContainersLabel(EcsButton):
@@ -80,9 +77,6 @@ class ContainersLabel(EcsButton):
 
     def retrieve_children(self):
         return (f"Containers '{self.identifier}'", [Container(c['containerInstanceArn'], c['ec2InstanceId'], self.identifier, c) for c in ecs_data.get_containers_instances(self.identifier)], None)
-
-    def retrieve_important_details(self):
-        return []
 
 
 class Container(EcsButton):
@@ -118,10 +112,10 @@ class Container(EcsButton):
             return (None, [])
 
     def special_action(self, key):
-        # if key is "I":
-        #     return ("SSH", self.detail[1]['PrivateIpAddress'])
-        # else:
-        return (None, [])
+        if key == "I":
+            return ("SSH", self.detail['ec2InstanceId'])
+        else:
+            return (None, [])
 
 class Service(EcsButton):
 
@@ -158,17 +152,22 @@ class Task(EcsButton):
     def retrieve_important_details(self):
         return [('Status', self.detail['lastStatus']),
                 ('Desired Status', self.detail['desiredStatus']),
+                ('EC2 Instance', self.detail['ec2InstanceId']),
                 ('Task Definition', self.detail['taskDefinitionArn']),
                 (['Container ', ('key', 'I'), 'nstance ID'], self.detail['containerInstanceArn'].split("/", 1)[1]),
-                ('Containers', '\n'.join(self.detail['networks']))]
+                ('N. Docker images', len(self.detail['containers'])),
+                ('Networks', '\n'.join(self.detail['networks']))]
 
-    def retrieve_by_highlight(self, key):
-        # if key is "I":
-        #     containers = ECS_CLIENT.retrieve_containers(self.cluster_identifier)
-        #     containers_by_id = dict((value[0]['containerInstanceArn'], value) for (key, value) in containers.iteritems())
-        #     return ("Containers", [Container(key, key.split("/")[1], self.cluster_identifier, value) for (key, value) in containers_by_id.iteritems()], self.detail['containerInstanceArn'].split("/", 1)[1])
-        # else:
-        return (None, [])
+    def special_action(self, key):
+        first_container = self.detail['containers'][0]
+        if key == "I":
+            return ("SSH", self.detail['ec2InstanceId'])
+        if key == "C":            
+            return ("SSH", "-t "+ self.detail['ec2InstanceId']+" docker exec -ti "+first_container['runtimeId']+" /bin/sh")
+        if key == "L":
+            return ("SSH", self.detail['ec2InstanceId']+" docker logs -f --tail=100 "+first_container['runtimeId'])
+        else:
+            return (None, [])
 
 
 class DockerContainer(EcsButton):
@@ -177,9 +176,6 @@ class DockerContainer(EcsButton):
         super(DockerContainer, self).__init__(identifier, identifier, detail)
         self.task_identifier = task_identifier
         self.cluster_identifier = cluster_identifier
-
-    def retrieve_children(self):
-        return (None, [])
 
     def retrieve_important_details(self):
         return [('Container Arn', self.detail['containerArn']),
@@ -192,10 +188,12 @@ class DockerContainer(EcsButton):
                 ('Instance ID', self.detail['ec2InstanceId']),
                 ('Networks', self.detail['networks'])]
 
-    def retrieve_by_highlight(self, key):
-        # if key is "I":
-        #     containers = ECS_CLIENT.retrieve_containers(self.cluster_identifier)
-        #     containers_by_id = dict((value[0]['containerInstanceArn'], value) for (key, value) in containers.iteritems())
-        #     return ("Containers", [Container(key, key.split("/")[1], self.cluster_identifier, value) for (key, value) in containers_by_id.iteritems()], self.detail['containerInstanceArn'].split("/", 1)[1])
-        # else:
-        return (None, [])
+    def special_action(self, key):
+        if key == "I":
+            return ("SSH", self.detail['ec2InstanceId'])
+        if key == "C":
+            return ("SSH", "-t "+ self.detail['ec2InstanceId']+" docker exec -ti "+self.detail['runtimeId']+" /bin/sh")
+        if key == "L":
+            return ("SSH", self.detail['ec2InstanceId']+" docker logs -f --tail=100 "+self.detail['runtimeId'])
+        else:
+            return (None, [])

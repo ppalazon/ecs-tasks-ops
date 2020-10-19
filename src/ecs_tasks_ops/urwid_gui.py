@@ -9,6 +9,7 @@ from urwid.command_map import ACTIVATE
 from ecs_tasks_ops.urwid_ecs import Cluster
 from ecs_tasks_ops import ecs_data
 
+SSH_SCRIPT = 'urxvt-ssh'
 
 class BodyController(object):
 
@@ -35,8 +36,7 @@ class BodyController(object):
         self.filter_string = ""
 
     def item_focus_change(self, item):
-        column_array = convert_details_to_columns(
-            item.retrieve_important_details())
+        column_array = convert_details_to_columns(item.retrieve_important_details())
 
         self.cols.contents = [
             (column_array[0], ('weight', 1, False)), (column_array[1], ('weight', 4, False))]
@@ -44,8 +44,7 @@ class BodyController(object):
     def toggle_detail(self, item):
         if not self.detail_view:
             self.before_detail = self.body
-            detail_text = json.dumps(
-                item.detail, indent=4, sort_keys=True, cls=DateTimeEncoder)
+            detail_text = json.dumps(item.detail, indent=4, sort_keys=True, cls=DateTimeEncoder)
             lines = detail_text.split('\n')
             text_lines = [urwid.Text(l) for l in lines]
             list_box = DetailListBox(urwid.SimpleFocusListWalker(text_lines), self)
@@ -114,9 +113,9 @@ class BodyController(object):
         item = list_walker.lines[list_walker.focus].base_widget
         type_of_action, args = item.special_action(key)
         key_dealt_with = False
-        # if type_of_action is "SSH" and SSH_SCRIPT is not None:
-        #     subprocess.call([SSH_SCRIPT, args])
-        #     key_dealt_with = True
+        if type_of_action == "SSH" and SSH_SCRIPT is not None:
+            subprocess.Popen([SSH_SCRIPT, args])
+            key_dealt_with = True
 
         if not key_dealt_with:
             result = RefreshableItems(item.retrieve_by_highlight, key)
@@ -169,7 +168,7 @@ class ChooseFromListWalker(urwid.ListWalker):
         return None, None
 
     def keypress(self, size, key):
-        if key in list(string.ascii_lowercase) or key == "backspace":
+        if key in list(string.ascii_lowercase) or key in list(string.digits) or key == "backspace":
             self.controller.filter_by(key)
         elif key == 'D':
             BODY_CONTROLLER.toggle_detail(self.lines[self.focus].base_widget)
