@@ -86,7 +86,7 @@ class Container(EcsButton):
         self.cluster_identifier = cluster_identifier
 
     def retrieve_children(self):
-        return (None, [])
+        return (f"Tasks '{self.name}'", [Task(self.identifier, self.cluster_identifier, t['name'], t) for t in ecs_data.get_tasks_container_instance(self.cluster_identifier, self.identifier)], None)
 
     def retrieve_important_details(self):
         ci = self.detail
