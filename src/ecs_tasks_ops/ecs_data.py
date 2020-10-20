@@ -4,9 +4,6 @@
 from ecs_tasks_ops import ecs_facade
 from itertools import chain
 
-
-ecs_data = {}
-
 def improve_container_instance_info(cluster_name):
     container_instances = ecs_facade.get_all_container_instances(cluster_name)
     for ci in container_instances:
@@ -91,32 +88,32 @@ def improve_docker_container_task_info(cluster_name, task_arn):
 
 
 def get_clusters():
-    return ecs_data.setdefault("clusters", ecs_facade.get_cluster_list())
+    return ecs_facade.get_cluster_list()
 
 
 def get_services(cluster_name):
-    return ecs_data.setdefault(cluster_name+".services", ecs_facade.get_all_services(cluster_name))
+    return ecs_facade.get_all_services(cluster_name)
 
 
 def get_containers_instances(cluster_name):
-    return ecs_data.setdefault(cluster_name+".container-instances", improve_container_instance_info(cluster_name))
+    return improve_container_instance_info(cluster_name)
 
 
 def get_tasks_cluster(cluster_name):
-    return ecs_data.setdefault(cluster_name+".tasks", improve_cluster_tasks_info(cluster_name))
+    return improve_cluster_tasks_info(cluster_name)
 
 
 def get_tasks_service(cluster_name, service_name):
-    return ecs_data.setdefault(cluster_name+"."+service_name+".tasks", improve_service_tasks_info(cluster_name, service_name))
+    return improve_service_tasks_info(cluster_name, service_name)
 
 
 def get_tasks_container_instance(cluster_name, containers_instance_arn):
-    return ecs_data.setdefault(cluster_name+"."+containers_instance_arn+".tasks", improve_container_instance_tasks_info(cluster_name, containers_instance_arn))
+    return improve_container_instance_tasks_info(cluster_name, containers_instance_arn)
 
 
 def get_containers_service(cluster_name, service_name):
-    return ecs_data.setdefault(cluster_name+"."+service_name+".containers", improve_docker_container_info(cluster_name, service_name))
+    return improve_docker_container_info(cluster_name, service_name)
 
 
 def get_containers_tasks(cluster_name, task_arn):
-    return ecs_data.setdefault(cluster_name+"."+task_arn+".containers", improve_docker_container_task_info(cluster_name, task_arn))
+    return improve_docker_container_task_info(cluster_name, task_arn)
