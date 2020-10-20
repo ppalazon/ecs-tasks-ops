@@ -244,6 +244,9 @@ dmypy.json
 .history
 .ionide
 
+
+### Aditional ignores
+poetry.lock
 *.orig
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm+all,python,visualstudiocode
