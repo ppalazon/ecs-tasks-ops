@@ -24,23 +24,31 @@
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="QTreeWidget" name="ecs_elements">
+       <widget class="ECSElementsTreeWidget" name="ecs_elements">
         <property name="maximumSize">
          <size>
           <width>16777215</width>
           <height>16777215</height>
          </size>
         </property>
+        <property name="indentation">
+         <number>12</number>
+        </property>
         <column>
          <property name="text">
-          <string notr="true">1</string>
+          <string>ECS Elements</string>
          </property>
         </column>
        </widget>
-       <widget class="QTreeWidget" name="attributes">
+       <widget class="ECSAttributesTreeWidget" name="attributes">
         <column>
          <property name="text">
-          <string notr="true">1</string>
+          <string>Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Value</string>
          </property>
         </column>
        </widget>
@@ -75,6 +83,15 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionReload_Clusters"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuECS_Taks_Operation"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -82,8 +99,94 @@
    <property name="text">
     <string>About</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionReload_Clusters">
+   <property name="text">
+    <string>Reload Clusters</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ECSElementsTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>ecs_tasks_ops_qt5.qt5_ecs</header>
+   <slots>
+    <slot>reload_cluster_info()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>ECSAttributesTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>ecs_tasks_ops_qt5.qt5_ecs</header>
+   <slots>
+    <slot>update_attributes()</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionQuit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ecs_elements</sender>
+   <signal>currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)</signal>
+   <receiver>attributes</receiver>
+   <slot>update_attributes()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>424</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionReload_Clusters</sender>
+   <signal>triggered()</signal>
+   <receiver>ecs_elements</receiver>
+   <slot>reload_cluster_info()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

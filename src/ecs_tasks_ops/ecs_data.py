@@ -32,7 +32,8 @@ def improve_tasks_info(cluster_name, tasks):
             if inst['containerInstanceArn'] == task['containerInstanceArn']:
                 task['ec2InstanceId'] = inst['ec2InstanceId']
         task['networks'] = [extract_network_from_docker_container(c) for c in task['containers']]
-        task['name'] = task['taskDefinitionArn'].split("/")[1] + " - " + task['taskArn'].split("/")[1]
+        #task['name'] = task['taskDefinitionArn'].split("/")[1] + " - " + task['taskArn'].split("/")[1]
+        task['name'] = task['taskDefinitionArn'].split("/")[1]
     return tasks
 
 
