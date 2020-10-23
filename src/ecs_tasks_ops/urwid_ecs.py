@@ -184,7 +184,7 @@ class DockerContainer(EcsButton):
                 ('Docker id', self.detail['runtimeId']),
                 ('Docker Image', self.detail['image']),
                 ('CPU', self.detail['cpu']),
-                ('Memory Reservation', self.detail['memoryReservation']),
+                #('Memory Reservation', self.detail['memoryReservation']),
                 ('Instance ID', self.detail['ec2InstanceId']),
                 ('Networks', self.detail['networks'])]
 
