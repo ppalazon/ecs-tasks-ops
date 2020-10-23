@@ -2,58 +2,7 @@
 
 from PyQt5 import QtWidgets, QtCore
 from ecs_tasks_ops import ecs_data
-
-class ECSElementsTreeWidget(QtWidgets.QTreeWidget):
-
-    statusChanged = QtCore.pyqtSignal(str)
-
-    def __init__(self, parent=None):
-        super(ECSElementsTreeWidget, self).__init__(parent)
-        self.reload_cluster_info()
-        self.currentItemChanged.connect(lambda item: self.show_status_on_selection(item))
-        self.itemActivated.connect(lambda item: item.refresh_children())
-        self.itemDoubleClicked.connect(lambda item: item.refresh_children())
-
-    def contextMenuEvent(self, event):
-        print(event.pos())
-        item = self.itemAt(event.pos())
-        if item:
-            menu = QtWidgets.QMenu(self)
-            item.get_context_menu(menu)
-            menu.exec_(event.globalPos())
-        else:
-            super(ECSElementsTreeWidget, self).contextMenuEvent(event)
-
-    def keyPressEvent(self, e):
-        # if e.key() == QtCore.Qt.Key_Escape:
-        #     self.close()
-
-        super(ECSElementsTreeWidget, self).keyPressEvent(e)
-
-    @QtCore.pyqtSlot()
-    def reload_cluster_info(self):
-        self.clear()
-        for cluster in ecs_data.get_clusters():
-            self.addTopLevelItem(ECSClusterTreeItem(cluster))
-
-    def show_status_on_selection(self, item):
-        if item:
-            self.statusChanged.emit(f"Selecting {item.name}: {item.identifier}")
-
-    # @QtCore.pyqtSignal(str)
-    # def operation_status(self, message):
-    #     self.emit
-
-class ECSAttributesTreeWidget(QtWidgets.QTreeWidget):
-    def __init__(self, parent=None):
-        super(ECSAttributesTreeWidget, self).__init__(parent)
-
-    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
-    def update_attributes(self, item):        
-        self.clear()
-        if item:
-            for attr in item.get_attributes():
-                self.addTopLevelItem(QtWidgets.QTreeWidgetItem([str(a) for a in attr]))
+from ecs_tasks_ops import pretty_json
 
 class ECSTreeItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, name, identifier, detail_type, detail, parent=None):
@@ -76,7 +25,10 @@ class ECSTreeItem(QtWidgets.QTreeWidgetItem):
             self.removeChild(self.child(i))
 
     def get_context_menu(self, menu):
-        pass
+        menu.addAction("Show Detail", self.command_show_detail)
+
+    def command_show_detail(self):
+        self.treeWidget().command_show_detail(self)
 
 
 class ECSClusterTreeItem(ECSTreeItem):
@@ -100,7 +52,8 @@ class ECSClusterTreeItem(ECSTreeItem):
                 ("Containers", self.detail['registeredContainerInstancesCount'])]
 
     def get_context_menu(self, menu):        
-        menu.addAction("Info", self.show_info)            
+        menu.addAction("Info", self.show_info)          
+        super(ECSClusterTreeItem, self).get_context_menu(menu)
     
     def show_info(self):
         print(f"Show info {self.name}")
@@ -207,3 +160,103 @@ class ECSContainerTreeItem(ECSTreeItem):
                 ('Memory', 'Available: ' + str(self.detail['available_memory']) +" Total: " + str(self.detail['total_memory'])),
                 ('CPU', 'Available: ' + str(self.detail['available_cpu']) +" Total: " + str(self.detail['total_cpu'])),
                 ('Taken ports', self.detail['taken_ports'])]
+
+
+class ECSElementsTreeWidget(QtWidgets.QTreeWidget):
+
+    statusChanged = QtCore.pyqtSignal(str)
+    commandShowDetail = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
+
+    def __init__(self, parent=None):
+        super(ECSElementsTreeWidget, self).__init__(parent)
+        self.reload_cluster_info()
+        self.currentItemChanged.connect(lambda item: self.show_status_on_selection(item))
+        self.itemActivated.connect(lambda item: item.refresh_children())
+        self.itemDoubleClicked.connect(lambda item: item.refresh_children())
+
+    def contextMenuEvent(self, event):
+        item = self.itemAt(event.pos())
+        if item:
+            menu = QtWidgets.QMenu(self)            
+            item.get_context_menu(menu)
+            menu.exec_(event.globalPos())
+        else:
+            super(ECSElementsTreeWidget, self).contextMenuEvent(event)
+
+    def keyPressEvent(self, e):
+        # if e.key() == QtCore.Qt.Key_Escape:
+        #     self.close()
+
+        super(ECSElementsTreeWidget, self).keyPressEvent(e)
+
+    @QtCore.pyqtSlot()
+    def reload_cluster_info(self):
+        self.clear()
+        for cluster in ecs_data.get_clusters():
+            self.addTopLevelItem(ECSClusterTreeItem(cluster))
+
+    def show_status_on_selection(self, item):
+        if item:
+            self.statusChanged.emit(f"Selecting {item.name}: {item.identifier}")
+
+    
+    def command_show_detail(self, item):
+        if item:
+            self.commandShowDetail.emit(item)
+
+    # @QtCore.pyqtSignal(str)
+    # def operation_status(self, message):
+    #     self.emit
+
+class ECSAttributesTreeWidget(QtWidgets.QTreeWidget):
+    def __init__(self, parent=None):
+        super(ECSAttributesTreeWidget, self).__init__(parent)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def update_attributes(self, item):        
+        self.clear()
+        if item:
+            for attr in item.get_attributes():
+                self.addTopLevelItem(QtWidgets.QTreeWidgetItem([str(a) for a in attr]))
+
+
+class ECSTabView(QtWidgets.QTabWidget):
+    def __init__(self, parent=None):
+        super(ECSTabView, self).__init__(parent)
+        self.tabCloseRequested.connect(self.info_tab_closed)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def open_tab_show_detail(self, item):
+        if item and item.detail:
+            self.addTab(ShowCode(pretty_json.get_pretty_json_str(item.detail)), item.name)
+
+    def info_tab_closed(self, index):
+        self.widget(index).close()
+        self.removeTab(index)
+
+
+class ShowCode(QtWidgets.QWidget):
+    def __init__(self, code_str, parent=None):
+        super(ShowCode, self).__init__(parent)
+    
+        layout = QtWidgets.QVBoxLayout()
+        text = QtWidgets.QTextBrowser()
+        text.setPlainText(code_str)
+        layout.addWidget(text)
+
+        self.setLayout(layout)    
+
+class EmbTerminal(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super(EmbTerminal, self).__init__(parent)
+        self.process = QtCore.QProcess(self)
+        self.terminal = QtWidgets.QWidget(self)
+        self.command = QtWidgets.QLineEdit(self)
+        self.command.setReadOnly(True)
+        self.command.setText("ssh i-2343432fds")
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.addWidget(self.command)
+        layout.addWidget(self.terminal)
+
+        # Works also with urxvt:
+        self.process.start('urxvt',['-embed', str(int(self.terminal.winId()))])

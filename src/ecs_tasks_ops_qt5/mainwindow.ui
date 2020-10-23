@@ -53,7 +53,7 @@
         </column>
        </widget>
       </widget>
-      <widget class="QTabWidget" name="tabWidget">
+      <widget class="ECSTabView" name="tabWidget">
        <property name="currentIndex">
         <number>-1</number>
        </property>
@@ -126,6 +126,7 @@
    <extends>QTreeWidget</extends>
    <header>ecs_tasks_ops_qt5.qt5_ecs</header>
    <slots>
+    <signal>commandShowDetail(QTreeWidgetItem*)</signal>
     <slot>reload_cluster_info()</slot>
    </slots>
   </customwidget>
@@ -135,6 +136,15 @@
    <header>ecs_tasks_ops_qt5.qt5_ecs</header>
    <slots>
     <slot>update_attributes()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>ECSTabView</class>
+   <extends>QTabWidget</extends>
+   <header>ecs_tasks_ops_qt5.qt5_ecs</header>
+   <container>1</container>
+   <slots>
+    <slot>open_tab_show_detail(QTreeWidgetItem*)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -185,6 +195,22 @@
     <hint type="destinationlabel">
      <x>255</x>
      <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ecs_elements</sender>
+   <signal>commandShowDetail(QTreeWidgetItem*)</signal>
+   <receiver>tabWidget</receiver>
+   <slot>open_tab_show_detail(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>255</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>648</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>

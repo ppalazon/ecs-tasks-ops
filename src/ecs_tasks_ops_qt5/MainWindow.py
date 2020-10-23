@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
         self.ecs_elements.setObjectName("ecs_elements")
         self.attributes = ECSAttributesTreeWidget(self.splitter_vertical)
         self.attributes.setObjectName("attributes")
-        self.tabWidget = QtWidgets.QTabWidget(self.splitter_horizontal)
+        self.tabWidget = ECSTabView(self.splitter_horizontal)
         self.tabWidget.setTabsClosable(True)
         self.tabWidget.setMovable(True)
         self.tabWidget.setObjectName("tabWidget")
@@ -66,6 +66,7 @@ class Ui_MainWindow(object):
         self.actionQuit.triggered.connect(MainWindow.close)
         self.ecs_elements.currentItemChanged['QTreeWidgetItem*','QTreeWidgetItem*'].connect(self.attributes.update_attributes)
         self.actionReload_Clusters.triggered.connect(self.ecs_elements.reload_cluster_info)
+        self.ecs_elements.commandShowDetail['QTreeWidgetItem*'].connect(self.tabWidget.open_tab_show_detail)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -82,4 +83,4 @@ class Ui_MainWindow(object):
         self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q"))
         self.actionReload_Clusters.setText(_translate("MainWindow", "Reload Clusters"))
         self.actionReload_Clusters.setShortcut(_translate("MainWindow", "Ctrl+R"))
-from ecs_tasks_ops_qt5.qt5_ecs import ECSAttributesTreeWidget, ECSElementsTreeWidget
+from ecs_tasks_ops_qt5.qt5_ecs import ECSAttributesTreeWidget, ECSElementsTreeWidget, ECSTabView
