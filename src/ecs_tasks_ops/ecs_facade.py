@@ -73,3 +73,7 @@ def get_all_tasks_container(cluster_name, container_arn):
     slices = [slice(i, i+100, 1) for i in range(0, len(list_tasks_arns), 100)]
     tasks = list(chain.from_iterable([get_describe_tasks(cluster_name, list_tasks_arns[slc]) for slc in slices]))
     return tasks
+
+def stop_task(cluster_name, task_arn, reason=''):
+    """Stop a specific task"""
+    return ecs_client.stop_task(cluster=cluster_name, task=task_arn, reason=reason).get('task', {})

@@ -127,6 +127,12 @@
    <header>ecs_tasks_ops_qt5.qt5_ecs</header>
    <slots>
     <signal>commandShowDetail(QTreeWidgetItem*)</signal>
+    <signal>commandServiceRestart(QTreeWidgetItem*)</signal>
+    <signal>commandTaskStop(QTreeWidgetItem*)</signal>
+    <signal>commandTaskLog(QTreeWidgetItem*)</signal>
+    <signal>commandContainerSSH(QTreeWidgetItem*)</signal>
+    <signal>commandDockerLog(QTreeWidgetItem*)</signal>
+    <signal>commandDockerExec(QTreeWidgetItem*)</signal>
     <slot>reload_cluster_info()</slot>
    </slots>
   </customwidget>
@@ -144,75 +150,12 @@
    <header>ecs_tasks_ops_qt5.qt5_ecs</header>
    <container>1</container>
    <slots>
-    <slot>open_tab_show_detail(QTreeWidgetItem*)</slot>
+    <slot>show_detail(QTreeWidgetItem*)</slot>
+    <slot>container_ssh(QTreeWidgetItem*)</slot>
+    <slot>task_log(QTreeWidgetItem*)</slot>
    </slots>
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>actionQuit</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>399</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ecs_elements</sender>
-   <signal>currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)</signal>
-   <receiver>attributes</receiver>
-   <slot>update_attributes()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>255</x>
-     <y>152</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>255</x>
-     <y>424</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionReload_Clusters</sender>
-   <signal>triggered()</signal>
-   <receiver>ecs_elements</receiver>
-   <slot>reload_cluster_info()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>255</x>
-     <y>152</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ecs_elements</sender>
-   <signal>commandShowDetail(QTreeWidgetItem*)</signal>
-   <receiver>tabWidget</receiver>
-   <slot>open_tab_show_detail(QTreeWidgetItem*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>255</x>
-     <y>152</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>648</x>
-     <y>298</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

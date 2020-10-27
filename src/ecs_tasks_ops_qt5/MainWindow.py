@@ -63,10 +63,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(-1)
-        self.actionQuit.triggered.connect(MainWindow.close)
-        self.ecs_elements.currentItemChanged['QTreeWidgetItem*','QTreeWidgetItem*'].connect(self.attributes.update_attributes)
-        self.actionReload_Clusters.triggered.connect(self.ecs_elements.reload_cluster_info)
-        self.ecs_elements.commandShowDetail['QTreeWidgetItem*'].connect(self.tabWidget.open_tab_show_detail)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

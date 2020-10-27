@@ -2,6 +2,7 @@
 
 from PyQt5 import QtWidgets, QtCore
 from ecs_tasks_ops import ecs_data
+from ecs_tasks_ops import ecs_facade
 from ecs_tasks_ops import pretty_json
 
 class ECSTreeItem(QtWidgets.QTreeWidgetItem):
@@ -25,6 +26,7 @@ class ECSTreeItem(QtWidgets.QTreeWidgetItem):
             self.removeChild(self.child(i))
 
     def get_context_menu(self, menu):
+        menu.addSeparator()
         menu.addAction("Refresh Children", self.refresh_children)
         menu.addAction("Show Detail", self.command_show_detail)
 
@@ -236,7 +238,7 @@ class ECSElementsTreeWidget(QtWidgets.QTreeWidget):
     commandServiceRestart = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
     commandTaskStop = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
     commandTaskLog = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
-    commandContinerSSH = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
+    commandContainerSSH = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
     commandDockerLog = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
     commandDockerExec = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
 
@@ -290,12 +292,12 @@ class ECSElementsTreeWidget(QtWidgets.QTreeWidget):
     def command_task_log(self, item):
         if item and isinstance(item, ECSTreeItem):
             self.statusChanged.emit(f"Log for task {item.name}: {item.identifier}")
-            self.commandTaskTaks.emit(item)
+            self.commandTaskLog.emit(item)
 
     def command_container_ssh(self, item):
         if item and isinstance(item, ECSTreeItem):
             self.statusChanged.emit(f"Access to ssh for {item.name}: {item.identifier}")
-            self.commandServiceRestart.emit(item)
+            self.commandContainerSSH.emit(item)
 
     def command_docker_log(self, item):
         if item and isinstance(item, ECSTreeItem):
@@ -312,13 +314,21 @@ class ECSElementsTreeWidget(QtWidgets.QTreeWidget):
     #     self.emit
 
 class ECSAttributesTreeWidget(QtWidgets.QTreeWidget):
+    
+    statusChanged = QtCore.pyqtSignal(str)
+
     def __init__(self, parent=None):
         super(ECSAttributesTreeWidget, self).__init__(parent)
+        self.currentItemChanged.connect(lambda item: self.show_status_on_selection(item))
+
+    def show_status_on_selection(self, item):
+        if item:
+            self.statusChanged.emit(f"{item.text(0)}: {item.text(1)}")
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
     def update_attributes(self, item):        
         self.clear()
-        if item:
+        if item and isinstance(item, ECSTreeItem):
             for attr in item.get_attributes():
                 self.addTopLevelItem(QtWidgets.QTreeWidgetItem([str(a) for a in attr]))
 
@@ -329,18 +339,61 @@ class ECSTabView(QtWidgets.QTabWidget):
         self.tabCloseRequested.connect(self.info_tab_closed)
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
-    def open_tab_show_detail(self, item):
+    def show_detail(self, item):
         if item and item.detail and isinstance(item, ECSTreeItem):
-            self.addTab(ShowCode(pretty_json.get_pretty_json_str(item.detail)), item.name)
+            tab_id = self.addTab(ShowResult(pretty_json.get_pretty_json_str(item.detail)), item.name)
+            self.setCurrentIndex(tab_id)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def container_ssh(self, item):
+        if item and item.detail and isinstance(item, ECSTreeItem):
+            bash_command = f"TERM=xterm ssh {item.detail['ec2InstanceId']}"
+            tab_id = self.addTab(EmbTerminal(bash_command), item.name)
+            self.setCurrentIndex(tab_id)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def task_stop(self, item):
+        if item and item.detail and isinstance(item, ECSTaskTreeItem):
+            question = QtWidgets.QMessageBox.question(self, f"Stopping {item.name}", f"Are you sure to stop {item.name}?")
+            if question == QtWidgets.QMessageBox.Yes:
+                self.task_stop_ok(item)
+
+    def task_stop_ok(self, item):
+            task_stopped = ecs_facade.stop_task(item.cluster_identifier, item.identifier, "Stopped from ECS Taks Operations")
+            tab_id = self.addTab(ShowResult(pretty_json.get_pretty_json_str(task_stopped)), f"Stopping {item.name}")
+            self.setCurrentIndex(tab_id)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def task_log(self, item):
+        if item and item.detail and isinstance(item, ECSTreeItem):
+            bash_command = f"TERM=xterm ssh {item.detail['ec2InstanceId']} docker logs -f --tail=100 {item.detail['containers'][0]['runtimeId']}"
+            tab_id = self.addTab(EmbTerminal(bash_command), item.name)
+            self.setCurrentIndex(tab_id)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def docker_container_log(self, item):
+        if item and item.detail and isinstance(item, ECSTreeItem):
+            bash_command = f"TERM=xterm ssh {item.detail['ec2InstanceId']} docker logs -f --tail=100 {item.detail['runtimeId']}"
+            tab_id = self.addTab(EmbTerminal(bash_command), item.name)
+            self.setCurrentIndex(tab_id)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def docker_container_exec(self, item):
+        if item and item.detail and isinstance(item, ECSTreeItem):
+            command_on_docker, ok = QtWidgets.QInputDialog.getText(self, 'Command to execute on docker', 'Command:')
+            if ok:
+                bash_command = f"TERM=xterm ssh -t {item.detail['ec2InstanceId']} docker exec -ti {item.detail['runtimeId']} {command_on_docker}; echo 'Press a key'; read q"
+                tab_id = self.addTab(EmbTerminal(bash_command), item.name)
+                self.setCurrentIndex(tab_id)
 
     def info_tab_closed(self, index):
         self.widget(index).close()
         self.removeTab(index)
 
 
-class ShowCode(QtWidgets.QWidget):
+class ShowResult(QtWidgets.QWidget):
     def __init__(self, code_str, parent=None):
-        super(ShowCode, self).__init__(parent)
+        super(ShowResult, self).__init__(parent)
     
         layout = QtWidgets.QVBoxLayout()
         text = QtWidgets.QTextBrowser()
@@ -350,16 +403,50 @@ class ShowCode(QtWidgets.QWidget):
         self.setLayout(layout)    
 
 class EmbTerminal(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, bash_command, parent=None):
         super(EmbTerminal, self).__init__(parent)
         self.process = QtCore.QProcess(self)
         self.terminal = QtWidgets.QWidget(self)
         self.command = QtWidgets.QLineEdit(self)
         self.command.setReadOnly(True)
-        self.command.setText("ssh i-2343432fds")
+        self.command.setText(bash_command)
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.command)
         layout.addWidget(self.terminal)
 
+        # env = QtCore.QProcessEnvironment.systemEnvironment()
+        # env.insert("TERM", "xterm")
+        # self.process.setProcessEnvironment(env)
+        
+        # Log errors
+        # self.process.error.connect(self.log_error)
+
         # Works also with urxvt:
-        self.process.start('urxvt',['-embed', str(int(self.terminal.winId()))])
+        terminal_args = []
+        if bash_command:
+            terminal_args = ["-e", "bash", "-c", bash_command] + terminal_args
+        self.process.start('urxvt',['-embed', str(int(self.terminal.winId()))]+terminal_args)
+
+    def closeEvent(self, event):
+        self.process.kill()
+
+    def log_error(self, error):
+        print(error)
+
+class ConfirmOperationDialog(QtWidgets.QDialog):
+
+    def __init__(self, title, accept_function, cancel_function, *args, **kwargs):
+        super(ConfirmOperationDialog, self).__init__(*args, **kwargs)
+        
+        self.setWindowTitle(title)
+        
+        QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        
+        self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(accept_function)
+        self.buttonBox.rejected.connect(cancel_function)
+
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.addWidget(QtWidgets.QLabel(title))
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
