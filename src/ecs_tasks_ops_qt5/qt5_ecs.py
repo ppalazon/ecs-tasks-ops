@@ -109,11 +109,15 @@ class ECSServiceTreeItem(ECSTreeItem):
                 ('Redeployment bracket', "Min: " + str(min_bracket) + "%, Max: " + str(max_bracket) + "%")]
 
     def get_context_menu(self, menu):        
+        menu.addAction("Show Events", self.command_service_show_events)    
         menu.addAction("Restart Service", self.command_service_restart)          
         super(ECSServiceTreeItem, self).get_context_menu(menu)
     
     def command_service_restart(self):
         self.treeWidget().command_service_restart(self)
+
+    def command_service_show_events(self):
+        self.treeWidget().command_service_show_events(self)
 
 
 class ECSTaskTreeItem(ECSTreeItem):
@@ -236,6 +240,7 @@ class ECSElementsTreeWidget(QtWidgets.QTreeWidget):
     statusChanged = QtCore.pyqtSignal(str)
     commandShowDetail = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
     commandServiceRestart = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
+    commandServiceShowEvents = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
     commandTaskStop = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
     commandTaskLog = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
     commandContainerSSH = QtCore.pyqtSignal(QtWidgets.QTreeWidgetItem)
@@ -309,6 +314,11 @@ class ECSElementsTreeWidget(QtWidgets.QTreeWidget):
             self.statusChanged.emit(f"Docker exec for {item.name}: {item.identifier}")
             self.commandDockerExec.emit(item)
 
+    def command_service_show_events(self, item):
+        if item and isinstance(item, ECSTreeItem):
+            self.statusChanged.emit(f"Show Events for {item.name}: {item.identifier}")
+            self.commandServiceShowEvents.emit(item)
+
     # @QtCore.pyqtSignal(str)
     # def operation_status(self, message):
     #     self.emit
@@ -349,6 +359,12 @@ class ECSTabView(QtWidgets.QTabWidget):
         if item and item.detail and isinstance(item, ECSTreeItem):
             bash_command = f"TERM=xterm ssh {item.detail['ec2InstanceId']}"
             tab_id = self.addTab(EmbTerminal(bash_command), item.name)
+            self.setCurrentIndex(tab_id)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def service_events(self, item):
+        if item and item.detail and isinstance(item, ECSServiceTreeItem):
+            tab_id = self.addTab(ShowServiceEvents(item.detail['events']), f"Events from {item.name}")
             self.setCurrentIndex(tab_id)
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
@@ -433,20 +449,20 @@ class EmbTerminal(QtWidgets.QWidget):
     def log_error(self, error):
         print(error)
 
-class ConfirmOperationDialog(QtWidgets.QDialog):
+class ShowServiceEvents(QtWidgets.QWidget):
+    def __init__(self, events, parent=None):
+        super(ShowServiceEvents, self).__init__(parent)
+    
+        layout = QtWidgets.QVBoxLayout(self)
+        table = QtWidgets.QTableWidget(self)
+        table.setRowCount(len(events))
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels(['Date', 'Message'])
+        table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        #table.horizontalHeader().setCascadingSectionResizes(True) # Only valid for QHeaderView.Interactive
+        for row, e in enumerate(events):
+            table.setItem(row, 0, QtWidgets.QTableWidgetItem(e['createdAt'].strftime("%Y-%m-%d %H:%M:%S")))
+            table.setItem(row, 1, QtWidgets.QTableWidgetItem(e['message']))
 
-    def __init__(self, title, accept_function, cancel_function, *args, **kwargs):
-        super(ConfirmOperationDialog, self).__init__(*args, **kwargs)
-        
-        self.setWindowTitle(title)
-        
-        QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
-        
-        self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(accept_function)
-        self.buttonBox.rejected.connect(cancel_function)
-
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(QtWidgets.QLabel(title))
-        self.layout.addWidget(self.buttonBox)
-        self.setLayout(self.layout)
+        layout.addWidget(table)
+        self.setLayout(layout)    

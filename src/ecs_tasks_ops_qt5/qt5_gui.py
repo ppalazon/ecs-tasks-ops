@@ -14,12 +14,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.setWindowTitle("ECS Tasks Operations")
 
-        self.splitter_horizontal.setSizes([100, 300])
+        self.splitter_horizontal.setSizes([100, 400])
         self.splitter_vertical.setSizes([200, 100])
         self.ecs_elements.statusChanged.connect(self.statusbar.showMessage)
         self.attributes.statusChanged.connect(self.statusbar.showMessage)
 
-        self.actionQuit.triggered.connect(MainWindow.close)
+        self.actionQuit.triggered.connect(self.close)
         self.ecs_elements.currentItemChanged['QTreeWidgetItem*','QTreeWidgetItem*'].connect(self.attributes.update_attributes)
         self.actionReload_Clusters.triggered.connect(self.ecs_elements.reload_cluster_info)
         self.ecs_elements.commandShowDetail['QTreeWidgetItem*'].connect(self.tabWidget.show_detail)
@@ -28,6 +28,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ecs_elements.commandTaskStop['QTreeWidgetItem*'].connect(self.tabWidget.task_stop)
         self.ecs_elements.commandDockerLog['QTreeWidgetItem*'].connect(self.tabWidget.docker_container_log)
         self.ecs_elements.commandDockerExec['QTreeWidgetItem*'].connect(self.tabWidget.docker_container_exec)
+        self.ecs_elements.commandServiceShowEvents['QTreeWidgetItem*'].connect(self.tabWidget.service_events)
 
 
 def main_gui():
