@@ -86,11 +86,11 @@ class ECSListContainersClusterTreeItem(ECSTreeItem):
 class ECSServiceTreeItem(ECSTreeItem):
     def __init__(self, detail, parent=None):
         super(ECSServiceTreeItem, self).__init__(name=detail['serviceName'], identifier=detail['serviceArn'], detail_type='service', detail=detail, parent=parent)
-        self.clusterArn = detail['clusterArn']
+        self.cluster_identifier = detail['clusterArn']
 
     def refresh_children(self):
         self.clear_children()
-        for task in ecs_data.get_tasks_service(self.clusterArn, self.identifier):
+        for task in ecs_data.get_tasks_service(self.cluster_identifier, self.identifier):
             self.addChild(ECSTaskTreeItem(task, self))
 
     def get_attributes(self):
@@ -110,7 +110,7 @@ class ECSServiceTreeItem(ECSTreeItem):
 
     def get_context_menu(self, menu):        
         menu.addAction("Show Events", self.command_service_show_events)    
-        menu.addAction("Restart Service", self.command_service_restart)          
+        menu.addAction("Force Restart Service", self.command_service_restart)          
         super(ECSServiceTreeItem, self).get_context_menu(menu)
     
     def command_service_restart(self):
@@ -149,7 +149,7 @@ class ECSTaskTreeItem(ECSTreeItem):
     def get_context_menu(self, menu):        
         menu.addAction("Stop Task", self.command_task_stop)          
         menu.addAction("SSH Instance Container", self.command_container_ssh)
-        menu.addAction("Show Log", self.command_task_log)
+        menu.addAction("Docker Log (First Task)", self.command_task_log)
         super(ECSTaskTreeItem, self).get_context_menu(menu)
     
     def command_task_stop(self):
@@ -377,6 +377,18 @@ class ECSTabView(QtWidgets.QTabWidget):
     def task_stop_ok(self, item):
             task_stopped = ecs_facade.stop_task(item.cluster_identifier, item.identifier, "Stopped from ECS Taks Operations")
             tab_id = self.addTab(ShowResult(pretty_json.get_pretty_json_str(task_stopped)), f"Stopping {item.name}")
+            self.setCurrentIndex(tab_id)
+
+    @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
+    def service_restart(self, item):
+        if item and item.detail and isinstance(item, ECSServiceTreeItem):
+            question = QtWidgets.QMessageBox.question(self, f"Restart {item.name}", f"Are you sure to force restart {item.name}?")
+            if question == QtWidgets.QMessageBox.Yes:
+                self.service_restart_ok(item)
+
+    def service_restart_ok(self, item):
+            service_restarted = ecs_facade.restart_service(item.cluster_identifier, item.identifier, True)
+            tab_id = self.addTab(ShowResult(pretty_json.get_pretty_json_str(service_restarted)), f"Force Restart {item.name}")
             self.setCurrentIndex(tab_id)
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)

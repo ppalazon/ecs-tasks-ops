@@ -29,6 +29,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ecs_elements.commandDockerLog['QTreeWidgetItem*'].connect(self.tabWidget.docker_container_log)
         self.ecs_elements.commandDockerExec['QTreeWidgetItem*'].connect(self.tabWidget.docker_container_exec)
         self.ecs_elements.commandServiceShowEvents['QTreeWidgetItem*'].connect(self.tabWidget.service_events)
+        self.ecs_elements.commandServiceRestart['QTreeWidgetItem*'].connect(self.tabWidget.service_restart)
 
 
 def main_gui():
