@@ -3,6 +3,7 @@
 import sys
 from PyQt5 import QtWidgets, uic, QtCore, QtGui
 
+import pkg_resources
 from ecs_tasks_ops import ecs_data
 from ecs_tasks_ops_qt5.MainWindow import Ui_MainWindow
 from ecs_tasks_ops_qt5.AboutDialog import Ui_AboutDialog
@@ -13,6 +14,10 @@ class AboutDialog(QtWidgets.QDialog, Ui_AboutDialog):
     def __init__(self, *args, **kwargs):
         super(AboutDialog, self).__init__(*args, **kwargs)
         self.setupUi(self)
+
+        version = pkg_resources.get_distribution('ecs_tasks_ops').version
+        self.version.setText(f"Version: {version}")
+
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):

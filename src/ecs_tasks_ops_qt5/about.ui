@@ -44,7 +44,7 @@
      <item>
       <widget class="QLabel" name="help">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This application will let you access through SSH to your ECS resources such as containers instances and docker containers. It will also allow you to stop tasks and restart services. &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;This is not a replacement of ECS User interface&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Version: 0.1.0 &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This application will let you access through SSH to your ECS resources such as containers instances and docker containers. It will also allow you to stop tasks and restart services. &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;This is not a replacement of ECS User interface&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::MarkdownText</enum>
@@ -54,6 +54,16 @@
        </property>
        <property name="wordWrap">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="version">
+       <property name="text">
+        <string>Version: 0.1.0 </string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
