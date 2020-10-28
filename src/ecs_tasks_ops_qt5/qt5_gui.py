@@ -5,7 +5,14 @@ from PyQt5 import QtWidgets, uic, QtCore, QtGui
 
 from ecs_tasks_ops import ecs_data
 from ecs_tasks_ops_qt5.MainWindow import Ui_MainWindow
+from ecs_tasks_ops_qt5.AboutDialog import Ui_AboutDialog
 from ecs_tasks_ops_qt5.qt5_ecs import ECSClusterTreeItem
+
+class AboutDialog(QtWidgets.QDialog, Ui_AboutDialog):
+
+    def __init__(self, *args, **kwargs):
+        super(AboutDialog, self).__init__(*args, **kwargs)
+        self.setupUi(self)
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs):
@@ -20,6 +27,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.attributes.statusChanged.connect(self.statusbar.showMessage)
 
         self.actionQuit.triggered.connect(self.close)
+        self.actionAbout.triggered.connect(self.open_about)
         self.ecs_elements.currentItemChanged['QTreeWidgetItem*','QTreeWidgetItem*'].connect(self.attributes.update_attributes)
         self.actionReload_Clusters.triggered.connect(self.ecs_elements.reload_cluster_info)
         self.ecs_elements.commandShowDetail['QTreeWidgetItem*'].connect(self.tabWidget.show_detail)
@@ -30,6 +38,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ecs_elements.commandDockerExec['QTreeWidgetItem*'].connect(self.tabWidget.docker_container_exec)
         self.ecs_elements.commandServiceShowEvents['QTreeWidgetItem*'].connect(self.tabWidget.service_events)
         self.ecs_elements.commandServiceRestart['QTreeWidgetItem*'].connect(self.tabWidget.service_restart)
+
+    def open_about(self):
+        about_dialog = AboutDialog(self)
+        about_dialog.exec_()
 
 
 def main_gui():
