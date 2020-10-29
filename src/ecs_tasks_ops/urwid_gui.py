@@ -9,8 +9,6 @@ from urwid.command_map import ACTIVATE
 from ecs_tasks_ops.urwid_ecs import Cluster
 from ecs_tasks_ops import ecs_data
 
-SSH_SCRIPT = 'urxvt-ssh'
-
 class BodyController(object):
 
     EMPTY_FILTER_TEXT = "< start typing to filter the results >"
@@ -113,8 +111,8 @@ class BodyController(object):
         item = list_walker.lines[list_walker.focus].base_widget
         type_of_action, args = item.special_action(key)
         key_dealt_with = False
-        if type_of_action == "SSH" and SSH_SCRIPT is not None:
-            subprocess.Popen([SSH_SCRIPT, args])
+        if type_of_action == "SSH":
+            subprocess.Popen(["urxvt", "-e", "bash", "-c", args])
             key_dealt_with = True
 
         if not key_dealt_with:

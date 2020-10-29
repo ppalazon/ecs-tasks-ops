@@ -2,6 +2,7 @@
 
 import urwid
 from ecs_tasks_ops import ecs_data
+from ecs_tasks_ops import ecs_ssh
 
 
 class EcsButton(urwid.Button):
@@ -113,7 +114,7 @@ class Container(EcsButton):
 
     def special_action(self, key):
         if key == "I":
-            return ("SSH", self.detail['ec2InstanceId'])
+            return ("SSH", ecs_ssh.ssh_cmd_container_instance(self.detail))
         else:
             return (None, [])
 
@@ -159,13 +160,12 @@ class Task(EcsButton):
                 ('Networks', '\n'.join(self.detail['networks']))]
 
     def special_action(self, key):
-        first_container = self.detail['containers'][0]
         if key == "I":
-            return ("SSH", self.detail['ec2InstanceId'])
+            return ("SSH", ecs_ssh.ssh_cmd_container_instance(self.detail))
         if key == "C":            
-            return ("SSH", "-t "+ self.detail['ec2InstanceId']+" docker exec -ti "+first_container['runtimeId']+" /bin/sh")
+            return ("SSH", ecs_ssh.ssh_cmd_task_exec(self.detail, "/bin/sh"))
         if key == "L":
-            return ("SSH", self.detail['ec2InstanceId']+" docker logs -f --tail=100 "+first_container['runtimeId'])
+            return ("SSH", ecs_ssh.ssh_cmd_task_log(self.detail))
         else:
             return (None, [])
 
@@ -190,10 +190,10 @@ class DockerContainer(EcsButton):
 
     def special_action(self, key):
         if key == "I":
-            return ("SSH", self.detail['ec2InstanceId'])
-        if key == "C":
-            return ("SSH", "-t "+ self.detail['ec2InstanceId']+" docker exec -ti "+self.detail['runtimeId']+" /bin/sh")
+            return ("SSH", ecs_ssh.ssh_cmd_container_instance(self.detail))
+        if key == "C":            
+            return ("SSH", ecs_ssh.ssh_cmd_docker_container_exec(self.detail, "/bin/sh"))
         if key == "L":
-            return ("SSH", self.detail['ec2InstanceId']+" docker logs -f --tail=100 "+self.detail['runtimeId'])
+            return ("SSH", ecs_ssh.ssh_cmd_docker_container_log(self.detail))
         else:
             return (None, [])

@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, QtCore
 from ecs_tasks_ops import ecs_data
 from ecs_tasks_ops import ecs_facade
 from ecs_tasks_ops import pretty_json
+from ecs_tasks_ops import ecs_ssh
 
 class ECSTreeItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, name, identifier, detail_type, detail, parent=None):
@@ -226,7 +227,7 @@ class ECSDockerContainerTreeItem(ECSTreeItem):
         super(ECSDockerContainerTreeItem, self).get_context_menu(menu)
 
     def command_container_ssh(self):
-        self.treeWidget().command_task_ssh(self)
+        self.treeWidget().command_container_ssh(self)
 
     def command_docker_log(self):
         self.treeWidget().command_docker_log(self)
@@ -357,7 +358,7 @@ class ECSTabView(QtWidgets.QTabWidget):
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
     def container_ssh(self, item):
         if item and item.detail and isinstance(item, ECSTreeItem):
-            bash_command = f"TERM=xterm ssh {item.detail['ec2InstanceId']}"
+            bash_command = ecs_ssh.ssh_cmd_container_instance(item.detail)
             tab_id = self.addTab(EmbTerminal(bash_command), item.name)
             self.setCurrentIndex(tab_id)
 
@@ -393,24 +394,24 @@ class ECSTabView(QtWidgets.QTabWidget):
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
     def task_log(self, item):
-        if item and item.detail and isinstance(item, ECSTreeItem):
-            bash_command = f"TERM=xterm ssh {item.detail['ec2InstanceId']} docker logs -f --tail=100 {item.detail['containers'][0]['runtimeId']}"
+        if item and item.detail and isinstance(item, ECSTaskTreeItem):
+            bash_command = ecs_ssh.ssh_cmd_task_log(item.detail)
             tab_id = self.addTab(EmbTerminal(bash_command), item.name)
             self.setCurrentIndex(tab_id)
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
     def docker_container_log(self, item):
-        if item and item.detail and isinstance(item, ECSTreeItem):
-            bash_command = f"TERM=xterm ssh {item.detail['ec2InstanceId']} docker logs -f --tail=100 {item.detail['runtimeId']}"
+        if item and item.detail and isinstance(item, ECSDockerContainerTreeItem):
+            bash_command = ecs_ssh.ssh_cmd_docker_container_log(item.detail)
             tab_id = self.addTab(EmbTerminal(bash_command), item.name)
             self.setCurrentIndex(tab_id)
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
     def docker_container_exec(self, item):
-        if item and item.detail and isinstance(item, ECSTreeItem):
+        if item and item.detail and isinstance(item, ECSDockerContainerTreeItem):
             command_on_docker, ok = QtWidgets.QInputDialog.getText(self, 'Command to execute on docker', 'Command:')
             if ok:
-                bash_command = f"TERM=xterm ssh -t {item.detail['ec2InstanceId']} docker exec -ti {item.detail['runtimeId']} {command_on_docker}; echo 'Press a key'; read q"
+                bash_command = ecs_ssh.ssh_cmd_docker_container_exec(item.detail, command_on_docker, True)
                 tab_id = self.addTab(EmbTerminal(bash_command), item.name)
                 self.setCurrentIndex(tab_id)
 
