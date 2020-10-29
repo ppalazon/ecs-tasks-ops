@@ -6,10 +6,7 @@ from curses import wrapper
 from ecs_tasks_ops import ecs_data
 from ecs_tasks_ops import ecs_facade
 from ecs_tasks_ops import pretty_table
-from ecs_tasks_ops import urwid_gui
 from ecs_tasks_ops.pretty_json import get_pretty_json_str
-from ecs_tasks_ops_qt5 import qt5_gui
-
 
 @click.group()
 @click.option('-x', '--debug/--no-debug', default=False)
@@ -127,21 +124,6 @@ def main_containers(ctx, cluster_name, service_name, docker_name):
     except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
-
-
-@main.command('gui')
-@click.pass_context
-def main_urwid(ctx):
-    """Open Urwid User Interface."""
-    urwid_gui.main_gui()
-
-
-@main.command('qt5')
-@click.pass_context
-def main_qt5(ctx):
-    """Open Qt5 User Interface."""
-    qt5_gui.main_gui()
-
 
 if __name__ == "__main__":
     # main(prog_name="ecs-tasks-ops")  # pragma: no cover

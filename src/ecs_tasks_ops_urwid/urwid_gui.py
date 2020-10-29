@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 import subprocess
 from urwid.command_map import ACTIVATE
-from ecs_tasks_ops.urwid_ecs import Cluster
+from ecs_tasks_ops_urwid.urwid_ecs import Cluster
 from ecs_tasks_ops import ecs_data
 
 class BodyController(object):
