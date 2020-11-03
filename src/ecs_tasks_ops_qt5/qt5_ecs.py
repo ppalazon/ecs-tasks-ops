@@ -412,7 +412,7 @@ class ECSTabView(QtWidgets.QTabWidget):
             command_on_docker, ok = QtWidgets.QInputDialog.getText(self, 'Command to execute on docker', 'Command:')
             if ok:
                 bash_command = ecs_ssh.ssh_cmd_docker_container_exec(item.detail, command_on_docker, True)
-                tab_id = self.addTab(EmbTerminal(bash_command), item.name)
+                tab_id = self.addTab(EmbTerminal(bash_command), f"{command_on_docker} on {item.name}")
                 self.setCurrentIndex(tab_id)
 
     def info_tab_closed(self, index):
