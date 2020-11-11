@@ -457,7 +457,7 @@ class EmbTerminal(QtWidgets.QWidget):
         self.process.start('urxvt',['-embed', str(int(self.terminal.winId()))]+terminal_args)
 
     def closeEvent(self, event):
-        self.process.kill()
+        self.process.terminate()
 
     def log_error(self, error):
         print(error)
