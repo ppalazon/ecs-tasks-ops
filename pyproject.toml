@@ -2,7 +2,7 @@
 name = "ecs-tasks-ops"
 version = "0.1.0"
 description = "Ecs Tasks Ops"
-authors = ["Pablo Palazon <pablo.palazon@gmail.com>"]
+authors = ["Pablo Palazon <ppalazon@antara.ws>"]
 license = "MIT"
 readme = "README.rst"
 homepage = "https://github.com/ppalazon/ecs-tasks-ops"

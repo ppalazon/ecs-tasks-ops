@@ -34,7 +34,7 @@
      <item>
       <widget class="QLabel" name="author">
        <property name="text">
-        <string>Pablo Palazon &lt;pablo.palazon@gmail.com&gt;</string>
+        <string>Pablo Palazon &lt;ppalazon@antara.ws&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

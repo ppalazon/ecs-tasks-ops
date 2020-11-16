@@ -56,6 +56,6 @@ class Ui_AboutDialog(object):
         _translate = QtCore.QCoreApplication.translate
         AboutDialog.setWindowTitle(_translate("AboutDialog", "Dialog"))
         self.app_name.setText(_translate("AboutDialog", "ECS Tasks Operations"))
-        self.author.setText(_translate("AboutDialog", "Pablo Palazon <pablo.palazon@gmail.com>"))
+        self.author.setText(_translate("AboutDialog", "Pablo Palazon <ppalazon@antara.ws>"))
         self.help.setText(_translate("AboutDialog", "<html><head/><body><p>This application will let you access through SSH to your ECS resources such as containers instances and docker containers. It will also allow you to stop tasks and restart services. </p><p><span style=\" font-weight:600;\">This is not a replacement of ECS User interface</span></p></body></html>"))
         self.version.setText(_translate("AboutDialog", "Version: 0.1.0 "))
