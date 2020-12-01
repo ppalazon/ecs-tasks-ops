@@ -2,11 +2,13 @@
 
 import click
 from ecs_tasks_ops_qt5 import qt5_gui
+from ecs_tasks_ops import ecs_conf
 
 
 @click.version_option()
 def main() -> None:
     """Open Qt5 User Interface."""
+    ecs_conf.load_config()
     qt5_gui.main_gui()
 
 

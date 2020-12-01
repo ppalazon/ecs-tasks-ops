@@ -5,6 +5,7 @@ from ecs_tasks_ops import ecs_data
 from ecs_tasks_ops import ecs_facade
 from ecs_tasks_ops import pretty_json
 from ecs_tasks_ops import ecs_ssh
+from ecs_tasks_ops import ecs_conf
 
 class ECSTreeItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, name, identifier, detail_type, detail, parent=None):
@@ -409,7 +410,8 @@ class ECSTabView(QtWidgets.QTabWidget):
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
     def docker_container_exec(self, item):
         if item and item.detail and isinstance(item, ECSDockerContainerTreeItem):
-            command_on_docker, ok = QtWidgets.QInputDialog.getText(self, 'Command to execute on docker', 'Command:')
+            commands = ecs_conf.cfg.get('commands', ['/bin/sh'])
+            command_on_docker, ok = QtWidgets.QInputDialog.getItem(self, 'Command to execute on docker', 'Command:', commands, editable=True)
             if ok:
                 bash_command = ecs_ssh.ssh_cmd_docker_container_exec(item.detail, command_on_docker, True)
                 tab_id = self.addTab(EmbTerminal(bash_command), f"{command_on_docker} on {item.name}")

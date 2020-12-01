@@ -54,7 +54,10 @@ class Ui_MainWindow(object):
         self.actionQuit.setObjectName("actionQuit")
         self.actionReload_Clusters = QtWidgets.QAction(MainWindow)
         self.actionReload_Clusters.setObjectName("actionReload_Clusters")
+        self.actionReload_Config = QtWidgets.QAction(MainWindow)
+        self.actionReload_Config.setObjectName("actionReload_Config")
         self.menuECS_Taks_Operation.addAction(self.actionAbout)
+        self.menuFile.addAction(self.actionReload_Config)
         self.menuFile.addAction(self.actionReload_Clusters)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
@@ -79,4 +82,5 @@ class Ui_MainWindow(object):
         self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q"))
         self.actionReload_Clusters.setText(_translate("MainWindow", "Reload Clusters"))
         self.actionReload_Clusters.setShortcut(_translate("MainWindow", "Ctrl+R"))
+        self.actionReload_Config.setText(_translate("MainWindow", "Reload Config"))
 from ecs_tasks_ops_qt5.qt5_ecs import ECSAttributesTreeWidget, ECSElementsTreeWidget, ECSTabView

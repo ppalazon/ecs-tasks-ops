@@ -87,6 +87,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionReload_Config"/>
     <addaction name="actionReload_Clusters"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -117,6 +118,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionReload_Config">
+   <property name="text">
+    <string>Reload Config</string>
    </property>
   </action>
  </widget>

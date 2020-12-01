@@ -5,6 +5,7 @@ from PyQt5 import QtWidgets, uic, QtCore, QtGui
 
 import pkg_resources
 from ecs_tasks_ops import ecs_data
+from ecs_tasks_ops import ecs_conf
 from ecs_tasks_ops_qt5.MainWindow import Ui_MainWindow
 from ecs_tasks_ops_qt5.AboutDialog import Ui_AboutDialog
 from ecs_tasks_ops_qt5.qt5_ecs import ECSClusterTreeItem
@@ -35,6 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionAbout.triggered.connect(self.open_about)
         self.ecs_elements.currentItemChanged['QTreeWidgetItem*','QTreeWidgetItem*'].connect(self.attributes.update_attributes)
         self.actionReload_Clusters.triggered.connect(self.ecs_elements.reload_cluster_info)
+        self.actionReload_Config.triggered.connect(self.reload_conf)
         self.ecs_elements.commandShowDetail['QTreeWidgetItem*'].connect(self.tabWidget.show_detail)
         self.ecs_elements.commandContainerSSH['QTreeWidgetItem*'].connect(self.tabWidget.container_ssh)
         self.ecs_elements.commandTaskLog['QTreeWidgetItem*'].connect(self.tabWidget.task_log)
@@ -47,6 +49,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def open_about(self):
         about_dialog = AboutDialog(self)
         about_dialog.exec_()
+
+    def reload_conf(self):
+        ecs_conf.load_config()
+        self.statusbar.showMessage("Reloading configuration")
 
 
 def main_gui():
