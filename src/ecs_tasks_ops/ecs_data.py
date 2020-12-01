@@ -66,7 +66,7 @@ def extract_docker_containers(task):
 
 
 def extract_network_from_docker_container(docker_container):
-    network_bindings = docker_container['networkBindings']
+    network_bindings = docker_container.get('networkBindings')
     bindings = [network['bindIP'] + " (" + str(network['hostPort']) + "[host] -> " + str(
         network['containerPort']) + "[network])" for network in network_bindings]
     if bindings is []:
