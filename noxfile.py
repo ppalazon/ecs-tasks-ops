@@ -13,7 +13,7 @@ from nox.sessions import Session
 
 
 package = "ecs_tasks_ops"
-python_versions = ["3.8", "3.7", "3.6"]
+python_versions = ["3.9", "3.8", "3.7", "3.6"]
 nox.options.sessions = "pre-commit", "safety", "mypy", "tests", "typeguard"
 
 
