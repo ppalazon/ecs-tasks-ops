@@ -1,8 +1,8 @@
 """Qt5 UI Initialization"""
-
 import click
-from ecs_tasks_ops_qt5 import qt5_gui
+
 from ecs_tasks_ops import ecs_conf
+from ecs_tasks_ops_qt5 import qt5_gui
 
 
 @click.version_option()

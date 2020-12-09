@@ -1,13 +1,15 @@
 """Urwind GUI for ECS tasks ops."""
+import json
+import string
+import subprocess
+from datetime import datetime
 
 import urwid
-import string
-import json
-from datetime import datetime
-import subprocess
 from urwid.command_map import ACTIVATE
-from ecs_tasks_ops_urwid.urwid_ecs import Cluster
+
 from ecs_tasks_ops import ecs_data
+from ecs_tasks_ops_urwid.urwid_ecs import Cluster
+
 
 class BodyController(object):
 
@@ -15,21 +17,33 @@ class BodyController(object):
 
     def __init__(self, initial_buttons):
         self.list_stack = [initial_buttons]
-        self.all_styled_buttons = [urwid.AttrMap(b, None, 'reveal focus')
-                                   for b in initial_buttons.items]
+        self.all_styled_buttons = [
+            urwid.AttrMap(b, None, "reveal focus") for b in initial_buttons.items
+        ]
         self.list_walker = ChooseFromListWalker(self.all_styled_buttons, self)
         list_box = ChooseFromListBox(self.list_walker)
 
         column_array = convert_details_to_columns(
-            initial_buttons.items[0].retrieve_important_details())
+            initial_buttons.items[0].retrieve_important_details()
+        )
 
-        self.cols = urwid.Columns([('weight', 1, column_array[0]), ('weight', 4, column_array[1])], )
+        self.cols = urwid.Columns(
+            [("weight", 1, column_array[0]), ("weight", 4, column_array[1])],
+        )
         self.detail_view = False
         self.base_title_text = self.list_stack[-1].items_title
-        self.title = urwid.AttrMap(urwid.Text(self.base_title_text + " " + self.EMPTY_FILTER_TEXT), 'title')
-        self.cols_title = urwid.AttrMap(urwid.Text(u'Attributes'), 'title')
-        self.body = urwid.Pile([(2, urwid.Filler(self.title, valign='top')), list_box, (
-            2, urwid.Filler(self.cols_title, valign='top')), self.cols])
+        self.title = urwid.AttrMap(
+            urwid.Text(self.base_title_text + " " + self.EMPTY_FILTER_TEXT), "title"
+        )
+        self.cols_title = urwid.AttrMap(urwid.Text(u"Attributes"), "title")
+        self.body = urwid.Pile(
+            [
+                (2, urwid.Filler(self.title, valign="top")),
+                list_box,
+                (2, urwid.Filler(self.cols_title, valign="top")),
+                self.cols,
+            ]
+        )
         self.before_detail = None
         self.filter_string = ""
 
@@ -37,21 +51,25 @@ class BodyController(object):
         column_array = convert_details_to_columns(item.retrieve_important_details())
 
         self.cols.contents = [
-            (column_array[0], ('weight', 1, False)), (column_array[1], ('weight', 4, False))]
+            (column_array[0], ("weight", 1, False)),
+            (column_array[1], ("weight", 4, False)),
+        ]
 
     def toggle_detail(self, item):
         if not self.detail_view:
             self.before_detail = self.body
-            detail_text = json.dumps(item.detail, indent=4, sort_keys=True, cls=DateTimeEncoder)
-            lines = detail_text.split('\n')
+            detail_text = json.dumps(
+                item.detail, indent=4, sort_keys=True, cls=DateTimeEncoder
+            )
+            lines = detail_text.split("\n")
             text_lines = [urwid.Text(l) for l in lines]
             list_box = DetailListBox(urwid.SimpleFocusListWalker(text_lines), self)
             self.body = list_box
-            LAYOUT.contents['body'] = (self.body, None)
+            LAYOUT.contents["body"] = (self.body, None)
             self.detail_view = True
         else:
             self.body = self.before_detail
-            LAYOUT.contents['body'] = (self.body, None)
+            LAYOUT.contents["body"] = (self.body, None)
             del self.before_detail
             self.detail_view = False
 
@@ -60,9 +78,13 @@ class BodyController(object):
             del item.lines[:]
             self.list_stack.pop()
             previous = self.list_stack[-1]
-            self.all_styled_buttons = [urwid.AttrMap(c, None, 'reveal focus') for c in previous.items]
+            self.all_styled_buttons = [
+                urwid.AttrMap(c, None, "reveal focus") for c in previous.items
+            ]
             self.base_title_text = previous.items_title
-            self.title.base_widget.set_text(self.base_title_text + " " + self.EMPTY_FILTER_TEXT)
+            self.title.base_widget.set_text(
+                self.base_title_text + " " + self.EMPTY_FILTER_TEXT
+            )
             item.lines.extend(self.all_styled_buttons)
             item.set_focus(0)
             item._modified()
@@ -81,11 +103,15 @@ class BodyController(object):
     def show_next_level(self, list_walker, new_items, highlight_text=None):
         if new_items and new_items.items_title:
             self.base_title_text = new_items.items_title
-            self.title.base_widget.set_text(self.base_title_text + " " + self.EMPTY_FILTER_TEXT)
+            self.title.base_widget.set_text(
+                self.base_title_text + " " + self.EMPTY_FILTER_TEXT
+            )
             list_walker.set_focus(0)
             del list_walker.lines[:]
             self.list_stack.append(new_items)
-            self.all_styled_buttons = [urwid.AttrMap(ch, None, 'reveal focus') for ch in new_items.items]
+            self.all_styled_buttons = [
+                urwid.AttrMap(ch, None, "reveal focus") for ch in new_items.items
+            ]
             list_walker.lines.extend(self.all_styled_buttons)
             if highlight_text is None:
                 list_walker.set_focus(0)
@@ -99,10 +125,19 @@ class BodyController(object):
         else:
             self.filter_string += str(key)
         if len(self.filter_string) > 0:
-            self.title.base_widget.set_text(self.base_title_text + " - filter=" + self.filter_string)
+            self.title.base_widget.set_text(
+                self.base_title_text + " - filter=" + self.filter_string
+            )
         else:
-            self.title.base_widget.set_text(self.base_title_text + " " + self.EMPTY_FILTER_TEXT)
-        self.list_walker.lines = list(filter(lambda item: item.base_widget.contains_word(self.filter_string), self.all_styled_buttons))
+            self.title.base_widget.set_text(
+                self.base_title_text + " " + self.EMPTY_FILTER_TEXT
+            )
+        self.list_walker.lines = list(
+            filter(
+                lambda item: item.base_widget.contains_word(self.filter_string),
+                self.all_styled_buttons,
+            )
+        )
         if len(self.list_walker.lines) > 0:
             self.list_walker.set_focus(0)
         self.list_walker._modified()
@@ -123,13 +158,13 @@ class BodyController(object):
 
 
 class ChooseFromListBox(urwid.ListBox):
-
     def keypress(self, size, key):
-        return super(ChooseFromListBox, self).keypress(size, self.body.keypress(size, key))
+        return super(ChooseFromListBox, self).keypress(
+            size, self.body.keypress(size, key)
+        )
 
 
 class ChooseFromListWalker(urwid.ListWalker):
-
     def __init__(self, data, controller):
         self.all_line = data
         self.lines = data
@@ -166,17 +201,24 @@ class ChooseFromListWalker(urwid.ListWalker):
         return None, None
 
     def keypress(self, size, key):
-        if key in list(string.ascii_lowercase) or key in list(string.digits) or key == "backspace":
+        if (
+            key in list(string.ascii_lowercase)
+            or key in list(string.digits)
+            or key == "backspace"
+        ):
             self.controller.filter_by(key)
-        elif key == 'D':
+        elif key == "D":
             BODY_CONTROLLER.toggle_detail(self.lines[self.focus].base_widget)
-        elif key == 'B':
+        elif key == "B":
             BODY_CONTROLLER.show_parent_list(self)
-        elif key == 'U':
+        elif key == "U":
             BODY_CONTROLLER.update(self)
         elif key in list(string.ascii_uppercase):
             self.controller.pass_special_instruction(self, key)
-        elif self.get_focus()[0] is not None and self.get_focus()[0]._command_map[key] == ACTIVATE:
+        elif (
+            self.get_focus()[0] is not None
+            and self.get_focus()[0]._command_map[key] == ACTIVATE
+        ):
             BODY_CONTROLLER.show_children(self)
         return key
 
@@ -189,18 +231,18 @@ def convert_details_to_columns(details):
             labels.extend(detail[0])
         else:
             labels.append(detail[0])
-        labels.append('\n')
+        labels.append("\n")
         data.append(str(detail[1]))
-    text2 = '\n'.join(data)
+    text2 = "\n".join(data)
     if len(labels) == 0:
-        labels = ''
-        text2 = ''
-    filler1 = urwid.Filler(urwid.Text(labels, 'left'), valign='top')
-    filler2 = urwid.Filler(urwid.Text(text2, 'left'), valign='top')
+        labels = ""
+        text2 = ""
+    filler1 = urwid.Filler(urwid.Text(labels, "left"), valign="top")
+    filler2 = urwid.Filler(urwid.Text(text2, "left"), valign="top")
     return [filler1, filler2]
 
 
-class RefreshableItems():
+class RefreshableItems:
     def __init__(self, retrieval_method, method_args):
         self.retrieval_method = retrieval_method
         self.method_args = method_args
@@ -228,33 +270,44 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class DetailListBox(urwid.ListBox):
-
     def __init__(self, body, controller):
         self.controller = controller
         super(DetailListBox, self).__init__(body)
 
     def keypress(self, size, key):
-        if key == 'B':
+        if key == "B":
             self.controller.toggle_detail(self)
         else:
             super(DetailListBox, self).keypress(size, key)
 
 
 def exit_on_cr(key):
-    if isinstance(key, str) and key in 'Q':
+    if isinstance(key, str) and key in "Q":
         raise urwid.ExitMainLoop()
 
 
-PALETTE = [('title', 'yellow', 'dark blue'),
-           ('reveal focus', 'black', 'white'),
-           ('key', 'yellow', 'dark blue', ('standout','underline'))]
-FOOTER = urwid.AttrMap(urwid.Text(
-    u'Press \'U\' to update, \'<enter>\' to look at sub-resources,\'D\' to look at more detail, \'B\' to go back to '
-    u'the previous page and \'Q\' to quit'), 'title')
+PALETTE = [
+    ("title", "yellow", "dark blue"),
+    ("reveal focus", "black", "white"),
+    ("key", "yellow", "dark blue", ("standout", "underline")),
+]
+FOOTER = urwid.AttrMap(
+    urwid.Text(
+        u"Press 'U' to update, '<enter>' to look at sub-resources,'D' to look at more detail, 'B' to go back to "
+        u"the previous page and 'Q' to quit"
+    ),
+    "title",
+)
 
 
 def retrieve_clusters():
-    return ('Clusters', [Cluster(c['clusterArn'], c['clusterName'], c) for c in ecs_data.get_clusters()])
+    return (
+        "Clusters",
+        [
+            Cluster(c["clusterArn"], c["clusterName"], c)
+            for c in ecs_data.get_clusters()
+        ],
+    )
 
 
 BODY_CONTROLLER = BodyController(RefreshableItems(retrieve_clusters, []))
@@ -267,5 +320,6 @@ def main_gui():
     main_loop = urwid.MainLoop(LAYOUT, palette=PALETTE, unhandled_input=exit_on_cr)
     main_loop.run()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main_gui()

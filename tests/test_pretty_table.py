@@ -1,6 +1,6 @@
 """Test for pretty format table from jsons."""
-
 from tabulate import tabulate
+
 from ecs_tasks_ops import pretty_table
 
 
@@ -44,7 +44,7 @@ def test_tabulate_list_json_from_out_of_index():
     """Test out of index tabulation."""
     data = [{"foo": 1, "bar": "hi", "none": None}]
     out = pretty_table.tabulate_list_json(data, fields_from=4)
-    assert '' == out
+    assert "" == out
 
 
 def test_tabulate_list_json_from_out_of_index():
@@ -67,4 +67,4 @@ def test_tabulate_list_json_keys_non_exists():
     data = [{"foo": 1, "bar": "hi", "none": None}]
     data_test = [{"foo": 1, "none": None}]
     out = pretty_table.tabulate_list_json_keys(data, keys=["another", "no_included"])
-    assert '' == out
+    assert "" == out

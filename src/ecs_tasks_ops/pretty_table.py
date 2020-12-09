@@ -1,10 +1,10 @@
 """Module to create beautiful tables from dicts"""
-
-
 from tabulate import tabulate
 
 
-def tabulate_list_json(data=[], fields_from=None, fields_to=None, empty_msg="No data to show") -> str:
+def tabulate_list_json(
+    data=[], fields_from=None, fields_to=None, empty_msg="No data to show"
+) -> str:
     """Generate a table with information from a list of json."""
     if not data:
         return empty_msg
@@ -25,4 +25,6 @@ def tabulate_list_json_keys(data=[], keys=[], empty_msg="No data to show"):
         return empty_msg
 
     headers = {k: k for k in keys}
-    return tabulate([{k: v for k, v in c.items() if k in headers} for c in data], headers=headers)
+    return tabulate(
+        [{k: v for k, v in c.items() if k in headers} for c in data], headers=headers
+    )
