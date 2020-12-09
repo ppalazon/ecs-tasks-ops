@@ -1,4 +1,8 @@
-"""Urwid data conversor from ECS facade"""
+"""Urwid data conversor from ECS facade."""
+from typing import Any
+from typing import Dict
+from typing import List
+
 import urwid
 
 from ecs_tasks_ops import ecs_data
@@ -6,34 +10,91 @@ from ecs_tasks_ops import ecs_ssh
 
 
 class EcsButton(urwid.Button):
-    def __init__(self, identifier, name, detail):
+    """Specific button for ECS elements."""
+
+    def __init__(self, identifier: str, name: str, detail: Dict[str, Any]) -> None:
+        """Create a new Element for ECS.
+
+        Args:
+            identifier (str): Unique identification for element, it could be aws arn
+            name (str): Name for visual identification of element
+            detail (Dict[str, Any]): JSON information from ECS
+        """
         self.identifier = identifier
         self.detail = detail
         self.name = name
         self.showing_detail = False
         super(EcsButton, self).__init__(name)
 
-    def retrieve_important_details(self):
+    def retrieve_important_details(self) -> List[Any]:
+        """Get a list of details as attributes as name / values.
+
+        Returns:
+            List[Any]: List of typles with name and value
+        """
         return []
 
-    def retrieve_children(self):
+    def retrieve_children(self) -> List[Any]:
+        """Request children for this element of this element.
+
+        Returns:
+            List[Any]: Tuple where first element is a name, and the second is a list
+        """
         return (None, [])
 
-    def retrieve_by_highlight(self, key):
+    def retrieve_by_highlight(self, key: str) -> List[Any]:
+        """Get element children when you hit a key.
+
+        Args:
+            key (str): Pressed key character
+
+        Returns:
+            List[Any]: Tuple with a title and a list of elements
+        """
         return (None, [])
 
-    def special_action(self, key):
+    def special_action(self, key: str) -> List[Any]:
+        """Execute an special action pressing a key.
+
+        Args:
+            key (str): Key pressed character
+
+        Returns:
+            List[Any]: Tuple with name command and command
+        """
         return (None, [])
 
-    def contains_word(self, word):
+    def contains_word(self, word: str) -> bool:
+        """Check the name of the element contains this word.
+
+        Args:
+            word (str): Word to search
+
+        Returns:
+            bool: Return if this element name contains this word
+        """
         return word.lower() in self.name.lower()
 
 
 class Cluster(EcsButton):
-    def __init__(self, identifier, name, detail):
+    """Specific button for ECS Clusters elements."""
+
+    def __init__(self, identifier: str, name: str, detail: Dict[str, Any]) -> None:
+        """Create a new Cluster Element.
+
+        Args:
+            identifier (str): Unique identification for element, it could be aws arn
+            name (str): Name for visual identification of element
+            detail (Dict[str, Any]): JSON information from ECS
+        """
         super(Cluster, self).__init__(identifier, name, detail)
 
-    def retrieve_important_details(self):
+    def retrieve_important_details(self) -> List[Any]:
+        """Get a list of details as attributes as name / values.
+
+        Returns:
+            List[Any]: List of typles with name and value
+        """
         return [
             ("Status", self.detail["status"]),
             (["Active ", ("key", "S"), "ervices"], self.detail["activeServicesCount"]),
@@ -45,7 +106,12 @@ class Cluster(EcsButton):
             ),
         ]
 
-    def retrieve_children(self):
+    def retrieve_children(self) -> List[Any]:
+        """Show a menu to get Tasks, Services and Container of this cluster.
+
+        Returns:
+            List[Any]: Tuple where first element is a name, and the second is a list
+        """
         return (
             f"Cluster '{self.name}'",
             [
@@ -55,7 +121,15 @@ class Cluster(EcsButton):
             ],
         )
 
-    def retrieve_by_highlight(self, key):
+    def retrieve_by_highlight(self, key: str) -> List[Any]:
+        """Get element children when you hit a key.
+
+        Args:
+            key (str): Pressed key character
+
+        Returns:
+            List[Any]: Tuple with a title and a list of elements
+        """
         if key == "T":
             return (
                 f"Tasks '{self.name}'",
@@ -93,10 +167,22 @@ class Cluster(EcsButton):
 
 
 class TasksLabel(EcsButton):
-    def __init__(self, cluster_identifier):
+    """Specific button for ECS Tasks elements."""
+
+    def __init__(self, cluster_identifier: str) -> None:
+        """Create a new TaskLabel Element.
+
+        Args:
+            cluster_identifier (str): Cluster unique identification
+        """
         super(TasksLabel, self).__init__(cluster_identifier, "Tasks", "")
 
-    def retrieve_children(self):
+    def retrieve_children(self) -> List[Any]:
+        """Get a list of tasks of this cluster.
+
+        Returns:
+            List[Any]: Tuple where first element is a name, and the second is a list
+        """
         return (
             f"Tasks '{self.identifier}'",
             [
@@ -108,10 +194,22 @@ class TasksLabel(EcsButton):
 
 
 class ServicesLabel(EcsButton):
-    def __init__(self, cluster_identifier):
+    """Specific button for ECS Services elements."""
+
+    def __init__(self, cluster_identifier: str) -> None:
+        """Create a new ServiceLabel Element.
+
+        Args:
+            cluster_identifier (str): Cluster unique identification
+        """
         super(ServicesLabel, self).__init__(cluster_identifier, "Services", "")
 
-    def retrieve_children(self):
+    def retrieve_children(self) -> List[Any]:
+        """Get a list of services of this cluster.
+
+        Returns:
+            List[Any]: Tuple where first element is a name, and the second is a list
+        """
         return (
             f"Services '{self.identifier}'",
             [
@@ -122,10 +220,22 @@ class ServicesLabel(EcsButton):
 
 
 class ContainersLabel(EcsButton):
-    def __init__(self, cluster_identifier):
+    """Specific button for ECS Container Label elements."""
+
+    def __init__(self, cluster_identifier: str) -> None:
+        """Create a new ContainersLabel Element.
+
+        Args:
+            cluster_identifier (str): Cluster unique identification
+        """
         super(ContainersLabel, self).__init__(cluster_identifier, "Containers", "")
 
     def retrieve_children(self):
+        """Get a list of containers of this cluster.
+
+        Returns:
+            List[Any]: Tuple where first element is a name, and the second is a list
+        """
         return (
             f"Containers '{self.identifier}'",
             [
@@ -139,11 +249,32 @@ class ContainersLabel(EcsButton):
 
 
 class Container(EcsButton):
-    def __init__(self, identifier, name, cluster_identifier, detail):
+    """Specific button for ECS Container elements."""
+
+    def __init__(
+        self,
+        identifier: str,
+        name: str,
+        cluster_identifier: str,
+        detail: Dict[str, Any],
+    ) -> None:
+        """Create a new Container Element.
+
+        Args:
+            identifier (str): Unique identification for element, it could be aws arn
+            name (str): Name for visual identification of element
+            cluster_identifier (str): Cluster unique identification
+            detail (Dict[str, Any]): JSON information from ECS
+        """
         super(Container, self).__init__(identifier, name, detail)
         self.cluster_identifier = cluster_identifier
 
-    def retrieve_children(self):
+    def retrieve_children(self) -> List[Any]:
+        """Get a list of tasks for this container.
+
+        Returns:
+            List[Any]: Tuple where first element is a name, and the second is a list
+        """
         return (
             f"Tasks '{self.name}'",
             [
@@ -155,7 +286,12 @@ class Container(EcsButton):
             None,
         )
 
-    def retrieve_important_details(self):
+    def retrieve_important_details(self) -> List[Any]:
+        """Get a list of details as attributes as name / values.
+
+        Returns:
+            List[Any]: List of typles with name and value
+        """
         ci = self.detail
         return [
             ("Status", ci["status"]),
@@ -185,7 +321,15 @@ class Container(EcsButton):
             ("Taken ports", ci["taken_ports"]),
         ]
 
-    def retrieve_by_highlight(self, key):
+    def retrieve_by_highlight(self, key: str) -> List[Any]:
+        """Get element children when you hit a key.
+
+        Args:
+            key (str): Pressed key character
+
+        Returns:
+            List[Any]: Tuple with a title and a list of elements
+        """
         if key == "T":
             return (
                 f"Tasks '{self.name}'",
@@ -200,7 +344,15 @@ class Container(EcsButton):
         else:
             return (None, [])
 
-    def special_action(self, key):
+    def special_action(self, key: str) -> List[Any]:
+        """Execute an special action pressing a key.
+
+        Args:
+            key (str): Key pressed character
+
+        Returns:
+            List[Any]: Tuple with name command and command
+        """
         if key == "I":
             return ("SSH", ecs_ssh.ssh_cmd_container_instance(self.detail))
         else:
@@ -208,11 +360,32 @@ class Container(EcsButton):
 
 
 class Service(EcsButton):
-    def __init__(self, identifier, name, cluster_identifier, detail):
+    """Specific button for ECS Services elements."""
+
+    def __init__(
+        self,
+        identifier: str,
+        name: str,
+        cluster_identifier: str,
+        detail: Dict[str, Any],
+    ) -> None:
+        """Create a new Service Element.
+
+        Args:
+            identifier (str): Unique identification for element, it could be aws arn
+            name (str): Name for visual identification of element
+            cluster_identifier (str): Cluster unique identification
+            detail (Dict[str, Any]): JSON information from ECS
+        """
         super(Service, self).__init__(identifier, name, detail)
         self.cluster_identifier = cluster_identifier
 
     def retrieve_children(self):
+        """Request children for this element of this element.
+
+        Returns:
+            List[Any]: Tuple where first element is a name, and the second is a list
+        """
         return (
             f"Tasks '{self.name}'",
             [
@@ -223,7 +396,12 @@ class Service(EcsButton):
             ],
         )
 
-    def retrieve_important_details(self):
+    def retrieve_important_details(self) -> List[Any]:
+        """Get a list of details as attributes as name / values.
+
+        Returns:
+            List[Any]: List of typles with name and value
+        """
         deployment_config = self.detail["deploymentConfiguration"]
         min_bracket = deployment_config["minimumHealthyPercent"]
         max_bracket = deployment_config["maximumPercent"]
@@ -242,12 +420,33 @@ class Service(EcsButton):
 
 
 class Task(EcsButton):
-    def __init__(self, service_identifier, cluster_identifier, identifier, detail):
+    """Specific button for ECS Task elements."""
+
+    def __init__(
+        self,
+        service_identifier: str,
+        cluster_identifier: str,
+        identifier: str,
+        detail: Dict[str, Any],
+    ) -> None:
+        """Create a new Task Element.
+
+        Args:
+            service_identifier (str): Service unique identification
+            cluster_identifier (str): Cluster unique identification
+            identifier (str): Unique identification for element, it could be aws arn
+            detail (Dict[str, Any]): JSON information from ECS
+        """
         super(Task, self).__init__(identifier, identifier, detail)
         self.service_identifier = service_identifier
         self.cluster_identifier = cluster_identifier
 
     def retrieve_children(self):
+        """Request children for this element of this element.
+
+        Returns:
+            List[Any]: Tuple where first element is a name, and the second is a list
+        """
         return (
             f"Docker Containers '{self.name}'",
             [
@@ -258,7 +457,12 @@ class Task(EcsButton):
             ],
         )
 
-    def retrieve_important_details(self):
+    def retrieve_important_details(self) -> List[Any]:
+        """Get a list of details as attributes as name / values.
+
+        Returns:
+            List[Any]: List of typles with name and value
+        """
         return [
             ("Status", self.detail["lastStatus"]),
             ("Desired Status", self.detail["desiredStatus"]),
@@ -272,7 +476,15 @@ class Task(EcsButton):
             ("Networks", "\n".join(self.detail["networks"])),
         ]
 
-    def special_action(self, key):
+    def special_action(self, key: str) -> List[Any]:
+        """Execute an special action pressing a key.
+
+        Args:
+            key (str): Key pressed character
+
+        Returns:
+            List[Any]: Tuple with name command and command
+        """
         if key == "I":
             return ("SSH", ecs_ssh.ssh_cmd_container_instance(self.detail))
         if key == "C":
@@ -284,12 +496,33 @@ class Task(EcsButton):
 
 
 class DockerContainer(EcsButton):
-    def __init__(self, task_identifier, cluster_identifier, identifier, detail):
+    """Specific button for Docker container elements."""
+
+    def __init__(
+        self,
+        task_identifier: str,
+        cluster_identifier: str,
+        identifier: str,
+        detail: Dict[str, Any],
+    ) -> None:
+        """Create a new Docker Container Element.
+
+        Args:
+            task_identifier (str): Task unique identification
+            cluster_identifier (str): Cluster unique identification
+            identifier (str): Unique identification for element, it could be aws arn
+            detail (Dict[str, Any]): JSON information from ECS
+        """
         super(DockerContainer, self).__init__(identifier, identifier, detail)
         self.task_identifier = task_identifier
         self.cluster_identifier = cluster_identifier
 
-    def retrieve_important_details(self):
+    def retrieve_important_details(self) -> List[Any]:
+        """Get a list of details as attributes as name / values.
+
+        Returns:
+            List[Any]: List of typles with name and value
+        """
         return [
             ("Container Arn", self.detail["containerArn"]),
             ("Status", self.detail["lastStatus"]),
@@ -302,7 +535,15 @@ class DockerContainer(EcsButton):
             ("Networks", self.detail["networks"]),
         ]
 
-    def special_action(self, key):
+    def special_action(self, key: str) -> List[Any]:
+        """Execute an special action pressing a key.
+
+        Args:
+            key (str): Key pressed character
+
+        Returns:
+            List[Any]: Tuple with name command and command
+        """
         if key == "I":
             return ("SSH", ecs_ssh.ssh_cmd_container_instance(self.detail))
         if key == "C":
