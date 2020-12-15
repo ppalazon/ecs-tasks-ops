@@ -1,4 +1,4 @@
-"""Clean and improve ecs data json"""
+"""Clean and improve ecs data json."""
 from itertools import chain
 
 from ecs_tasks_ops import ecs_facade

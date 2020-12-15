@@ -1,8 +1,4 @@
 """Command-line interface."""
-import curses
-import json
-from curses import wrapper
-
 import click
 
 from ecs_tasks_ops import ecs_data
@@ -20,7 +16,7 @@ def main(ctx, debug, output_json) -> None:
     """Ecs Tasks Ops."""
     ctx.ensure_object(dict)
     ctx.obj["DEBUG"] = debug
-    ## TODO: Format output with json
+    # TODO: Format output with json
     ctx.obj["OUT_JSON"] = output_json
 
 

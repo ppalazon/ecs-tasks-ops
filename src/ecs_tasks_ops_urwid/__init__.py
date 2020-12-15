@@ -1,1 +1,1 @@
-"""Urwid user interface for ECS Tasks Operation module"""
+"""Urwid user interface for ECS Tasks Operation module."""

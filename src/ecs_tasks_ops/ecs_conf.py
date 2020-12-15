@@ -1,4 +1,4 @@
-"""Configuration file for ecs-task-ops"""
+"""Configuration file for ecs-task-ops."""
 import json
 import os
 

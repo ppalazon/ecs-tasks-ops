@@ -1,8 +1,7 @@
-"""ECS pretty print for json objects"""
+"""ECS pretty print for json objects."""
 import datetime
 import json
 from json import JSONEncoder
-from typing import Dict
 
 
 # subclass JSONEncoder
@@ -11,6 +10,7 @@ class DateTimeEncoder(JSONEncoder):
 
     # Override the default method
     def default(self, obj):
+        """Default method for encoder."""
         if isinstance(obj, (datetime.date, datetime.datetime)):
             return obj.isoformat()
 
