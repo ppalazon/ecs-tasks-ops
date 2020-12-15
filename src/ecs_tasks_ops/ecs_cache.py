@@ -1,4 +1,4 @@
-"""Cache ecs data on a dictionary"""
+"""Cache ecs data on a dictionary."""
 from . import ecs_data
 
 cache = {}

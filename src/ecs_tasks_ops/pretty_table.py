@@ -3,7 +3,7 @@ from tabulate import tabulate
 
 
 def tabulate_list_json(
-    data=[], fields_from=None, fields_to=None, empty_msg="No data to show"
+    data=(), fields_from=None, fields_to=None, empty_msg="No data to show"
 ) -> str:
     """Generate a table with information from a list of json."""
     if not data:
@@ -19,7 +19,7 @@ def tabulate_list_json(
     return tabulate_list_json_keys(data=data, keys=keys, empty_msg=empty_msg)
 
 
-def tabulate_list_json_keys(data=[], keys=[], empty_msg="No data to show"):
+def tabulate_list_json_keys(data=(), keys=(), empty_msg="No data to show"):
     """Generate a table from a list of json where you can specify keys to show."""
     if not data:
         return empty_msg

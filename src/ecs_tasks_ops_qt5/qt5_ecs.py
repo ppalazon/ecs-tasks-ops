@@ -568,7 +568,7 @@ class ECSTabView(QtWidgets.QTabWidget):
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
     def task_stop(self, item):
-        """Send task stop command"""
+        """Send task stop command."""
         if item and item.detail and isinstance(item, ECSTaskTreeItem):
             question = QtWidgets.QMessageBox.question(
                 self, f"Stopping {item.name}", f"Are you sure to stop {item.name}?"
