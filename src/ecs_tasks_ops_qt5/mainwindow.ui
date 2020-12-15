@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>main_window</class>
+ <widget class="QMainWindow" name="main_window">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -77,26 +77,26 @@
      <height>20</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuECS_Taks_Operation">
+   <widget class="QMenu" name="menu_ecs_taks_ops">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionAbout"/>
+    <addaction name="action_about"/>
    </widget>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menu_file">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionReload_Config"/>
-    <addaction name="actionReload_Clusters"/>
+    <addaction name="action_reload_config"/>
+    <addaction name="action_reload_clusters"/>
     <addaction name="separator"/>
-    <addaction name="actionQuit"/>
+    <addaction name="action_quit"/>
    </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuECS_Taks_Operation"/>
+   <addaction name="menu_file"/>
+   <addaction name="menu_ecs_taks_ops"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionAbout">
+  <action name="action_about">
    <property name="text">
     <string>About</string>
    </property>
@@ -104,7 +104,7 @@
     <string>Ctrl+A</string>
    </property>
   </action>
-  <action name="actionQuit">
+  <action name="action_quit">
    <property name="text">
     <string>Quit</string>
    </property>
@@ -112,7 +112,7 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionReload_Clusters">
+  <action name="action_reload_clusters">
    <property name="text">
     <string>Reload Clusters</string>
    </property>
@@ -120,7 +120,7 @@
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="actionReload_Config">
+  <action name="action_reload_config">
    <property name="text">
     <string>Reload Config</string>
    </property>

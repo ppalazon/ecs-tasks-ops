@@ -9,13 +9,16 @@ from PyQt5 import uic
 
 from ecs_tasks_ops import ecs_conf
 from ecs_tasks_ops import ecs_data
-from ecs_tasks_ops_qt5.AboutDialog import Ui_AboutDialog
-from ecs_tasks_ops_qt5.MainWindow import Ui_MainWindow
+from ecs_tasks_ops_qt5.about import Ui_about_dialog
+from ecs_tasks_ops_qt5.main_window import Ui_main_window
 from ecs_tasks_ops_qt5.qt5_ecs import ECSClusterTreeItem
 
 
-class AboutDialog(QtWidgets.QDialog, Ui_AboutDialog):
+class AboutDialog(QtWidgets.QDialog, Ui_about_dialog):
+    """About Dialog widget."""
+
     def __init__(self, *args, **kwargs):
+        """Initialize about dialog."""
         super(AboutDialog, self).__init__(*args, **kwargs)
         self.setupUi(self)
 
@@ -23,8 +26,11 @@ class AboutDialog(QtWidgets.QDialog, Ui_AboutDialog):
         self.version.setText(f"Version: {version}")
 
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+class MainWindow(QtWidgets.QMainWindow, Ui_main_window):
+    """Main Window for this application."""
+
     def __init__(self, *args, obj=None, **kwargs):
+        """Initialize application and connections between widgets."""
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
 
@@ -32,53 +38,56 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.splitter_horizontal.setSizes([100, 400])
         self.splitter_vertical.setSizes([200, 100])
-        self.ecs_elements.statusChanged.connect(self.statusbar.showMessage)
-        self.attributes.statusChanged.connect(self.statusbar.showMessage)
+        self.ecs_elements.sig_status_changed.connect(self.statusbar.showMessage)
+        self.attributes.sig_status_changed.connect(self.statusbar.showMessage)
 
-        self.actionQuit.triggered.connect(self.close)
-        self.actionAbout.triggered.connect(self.open_about)
+        self.action_quit.triggered.connect(self.close)
+        self.action_about.triggered.connect(self.open_about)
         self.ecs_elements.currentItemChanged[
             "QTreeWidgetItem*", "QTreeWidgetItem*"
         ].connect(self.attributes.update_attributes)
-        self.actionReload_Clusters.triggered.connect(
+        self.action_reload_clusters.triggered.connect(
             self.ecs_elements.reload_cluster_info
         )
-        self.actionReload_Config.triggered.connect(self.reload_conf)
-        self.ecs_elements.commandShowDetail["QTreeWidgetItem*"].connect(
+        self.action_reload_config.triggered.connect(self.reload_conf)
+        self.ecs_elements.sig_command_show_detail["QTreeWidgetItem*"].connect(
             self.tabWidget.show_detail
         )
-        self.ecs_elements.commandContainerSSH["QTreeWidgetItem*"].connect(
+        self.ecs_elements.sig_command_container_ssh["QTreeWidgetItem*"].connect(
             self.tabWidget.container_ssh
         )
-        self.ecs_elements.commandTaskLog["QTreeWidgetItem*"].connect(
+        self.ecs_elements.sig_command_task_log["QTreeWidgetItem*"].connect(
             self.tabWidget.task_log
         )
-        self.ecs_elements.commandTaskStop["QTreeWidgetItem*"].connect(
+        self.ecs_elements.sig_command_task_stop["QTreeWidgetItem*"].connect(
             self.tabWidget.task_stop
         )
-        self.ecs_elements.commandDockerLog["QTreeWidgetItem*"].connect(
+        self.ecs_elements.sig_command_docker_log["QTreeWidgetItem*"].connect(
             self.tabWidget.docker_container_log
         )
-        self.ecs_elements.commandDockerExec["QTreeWidgetItem*"].connect(
+        self.ecs_elements.sig_command_docker_exec["QTreeWidgetItem*"].connect(
             self.tabWidget.docker_container_exec
         )
-        self.ecs_elements.commandServiceShowEvents["QTreeWidgetItem*"].connect(
+        self.ecs_elements.sig_command_service_show_events["QTreeWidgetItem*"].connect(
             self.tabWidget.service_events
         )
-        self.ecs_elements.commandServiceRestart["QTreeWidgetItem*"].connect(
+        self.ecs_elements.sig_command_service_restart["QTreeWidgetItem*"].connect(
             self.tabWidget.service_restart
         )
 
     def open_about(self):
+        """Open About Dialog widget."""
         about_dialog = AboutDialog(self)
         about_dialog.exec_()
 
     def reload_conf(self):
+        """Reload configuration file."""
         ecs_conf.load_config()
         self.statusbar.showMessage("Reloading configuration")
 
 
 def main_gui():
+    """Main method to start QT5 application from cli."""
     app = QtWidgets.QApplication(sys.argv)
 
     window = MainWindow()

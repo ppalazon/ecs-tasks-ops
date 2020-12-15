@@ -1,4 +1,4 @@
-"""Module to create beautiful tables from dicts"""
+"""Module to create beautiful tables from dicts."""
 from tabulate import tabulate
 
 
