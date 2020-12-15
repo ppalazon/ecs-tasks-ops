@@ -6,6 +6,7 @@ cfg = {}
 
 
 def load_config():
+    """Load configuration json file for this application."""
     global cfg, cfg_path
     for loc in (
         os.curdir,

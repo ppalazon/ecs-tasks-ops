@@ -22,7 +22,6 @@ Changelog = "https://github.com/ppalazon/ecs-tasks-ops/releases"
 python = "^3.6.1"
 click = "^7.0"
 boto3 = "^1.15.13"
-boto3-stubs = {extras = ["ec2", "ecs"], version = "^1.15.14"}
 tabulate = "^0.8.7"
 urwid = "^2.1.2"
 PyQt5 = "^5.15.1"

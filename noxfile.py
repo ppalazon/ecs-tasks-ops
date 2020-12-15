@@ -14,7 +14,7 @@ from nox.sessions import Session
 
 package = "ecs_tasks_ops"
 python_versions = ["3.9", "3.8", "3.7", "3.6"]
-nox.options.sessions = "pre-commit", "safety", "mypy", "tests", "typeguard"
+nox.options.sessions = "pre-commit", "safety", "tests", "typeguard"  # , "mypy"
 
 
 class Poetry:
@@ -194,15 +194,15 @@ def safety(session: Session) -> None:
         session.run("safety", "check", f"--file={requirements}", "--bare")
 
 
-@nox.session(python=python_versions)
-def mypy(session: Session) -> None:
-    """Type-check using mypy."""
-    args = session.posargs or ["src", "tests", "docs/conf.py"]
-    install_package(session)
-    install(session, "mypy")
-    session.run("mypy", *args)
-    if not session.posargs:
-        session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
+# @nox.session(python=python_versions)
+# def mypy(session: Session) -> None:
+#     """Type-check using mypy."""
+#     args = session.posargs or ["src", "tests", "docs/conf.py"]
+#     install_package(session)
+#     install(session, "mypy")
+#     session.run("mypy", *args)
+#     if not session.posargs:
+#         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
 
 
 @nox.session(python=python_versions)

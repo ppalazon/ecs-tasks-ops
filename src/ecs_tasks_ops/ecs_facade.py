@@ -7,6 +7,7 @@ ecs_client = boto3.client("ecs")
 
 
 def get_ecs_list(operation_name, response_attribute, **operation_params):
+    """Get a complete list of elements by operation_name."""
     paginator = ecs_client.get_paginator(operation_name)
     operation_params["PaginationConfig"] = {"MaxItems": 100}
     paginator_ite = paginator.paginate(**operation_params)
@@ -24,18 +25,21 @@ def get_cluster_list():
 
 
 def get_describe_services(cluster_name, services_arns):
+    """Get information about a list of services arns."""
     return ecs_client.describe_services(
         cluster=cluster_name, services=services_arns
     ).get("services", [])
 
 
 def get_describe_tasks(cluster_name, tasks_arns):
+    """Get information about a list of tasks."""
     return ecs_client.describe_tasks(cluster=cluster_name, tasks=tasks_arns).get(
         "tasks", []
     )
 
 
 def get_describe_container_instances(cluster_name, container_instances_arns):
+    """Get information about a list of container instances."""
     return ecs_client.describe_container_instances(
         cluster=cluster_name, containerInstances=container_instances_arns
     ).get("containerInstances", [])

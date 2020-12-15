@@ -3,15 +3,22 @@ import json
 import string
 import subprocess
 from datetime import datetime
+from typing import Any
+from typing import Callable
+from typing import Final
+from typing import List
+from typing import Tuple
 
 import urwid
 from urwid.command_map import ACTIVATE
 
 from ecs_tasks_ops import ecs_data
 from ecs_tasks_ops_urwid.urwid_ecs import Cluster
+from ecs_tasks_ops_urwid.urwid_ecs import UrwidData
 
 
 class BodyController(object):
+    """Main object for urwid interface for ECS Tasks Ops."""
 
     EMPTY_FILTER_TEXT = "< start typing to filter the results >"
 
@@ -48,6 +55,7 @@ class BodyController(object):
         self.filter_string = ""
 
     def item_focus_change(self, item):
+        """Focus on change."""
         column_array = convert_details_to_columns(item.retrieve_important_details())
 
         self.cols.contents = [
@@ -56,6 +64,7 @@ class BodyController(object):
         ]
 
     def toggle_detail(self, item):
+        """Toggle detail."""
         if not self.detail_view:
             self.before_detail = self.body
             detail_text = json.dumps(
@@ -74,6 +83,7 @@ class BodyController(object):
             self.detail_view = False
 
     def show_parent_list(self, item):
+        """Show parent list."""
         if len(self.list_stack) > 1:
             del item.lines[:]
             self.list_stack.pop()
@@ -90,17 +100,20 @@ class BodyController(object):
             item._modified()
 
     def show_children(self, list_walker):
+        """Show list of children elements."""
         item = list_walker.lines[list_walker.focus].base_widget
         refreshable_items = RefreshableItems(item.retrieve_children, [])
 
         self.show_next_level(list_walker, refreshable_items)
 
     def update(self, list_walker):
+        """Update element."""
         current = self.list_stack.pop()
         current.refresh()
         self.show_next_level(list_walker, current, current.highlighted)
 
     def show_next_level(self, list_walker, new_items, highlight_text=None):
+        """Show next level."""
         if new_items and new_items.items_title:
             self.base_title_text = new_items.items_title
             self.title.base_widget.set_text(
@@ -120,6 +133,7 @@ class BodyController(object):
             list_walker._modified()
 
     def filter_by(self, key):
+        """Filter by string."""
         if key == "backspace":
             self.filter_string = self.filter_string[:-1]
         else:
@@ -143,6 +157,7 @@ class BodyController(object):
         self.list_walker._modified()
 
     def pass_special_instruction(self, list_walker, key):
+        """Execute special instruction."""
         item = list_walker.lines[list_walker.focus].base_widget
         type_of_action, args = item.special_action(key)
         key_dealt_with = False
@@ -158,40 +173,95 @@ class BodyController(object):
 
 
 class ChooseFromListBox(urwid.ListBox):
-    def keypress(self, size, key):
+    def keypress(self, size: int, key: str) -> Any:
+        """Process key pressed on item.
+
+        Args:
+            size (int): Size of the list
+            key (str): Key pressed
+
+        Returns:
+            Any: Process key
+        """
         return super(ChooseFromListBox, self).keypress(
             size, self.body.keypress(size, key)
         )
 
 
 class ChooseFromListWalker(urwid.ListWalker):
-    def __init__(self, data, controller):
+    """List ECS Elements."""
+
+    def __init__(self, data: Any, controller: Any):
         self.all_line = data
         self.lines = data
-        self.focus = 0
+        self.focus: int = 0
         self.controller = controller
 
-    def get_focus(self):
+    def get_focus(self) -> int:
+        """Get focus position.
+
+        Returns:
+            int: Position
+        """
         return self._get_at_pos(self.focus)
 
-    def focus_on(self, text):
+    def focus_on(self, text: str) -> Any:
+        """Set focus with item which contains text
+
+        Args:
+            text (str): Text to search
+
+        Returns:
+            Any: After self_modified()
+        """
         texts = [s.base_widget.label for s in self.lines]
         self.set_focus(texts.index(text))
 
-    def set_focus(self, focus):
+    def set_focus(self, focus: int) -> Any:
+        """Set focus on position
+
+        Args:
+            focus (int): Position
+
+        Returns:
+            Any: After self._modified()
+        """
         self.focus = focus
         BODY_CONTROLLER.item_focus_change(self.lines[focus].base_widget)
 
         self._modified()
 
-    def get_next(self, start_from):
+    def get_next(self, start_from: int) -> Tuple[int, Any]:
+        """Return tuple below position.
+
+        Args:
+            start_from (int): Position
+
+        Returns:
+            Tuple[int, Any]: Tuple with position and item
+        """
         return self._get_at_pos(start_from + 1)
 
-    def get_prev(self, start_from):
+    def get_prev(self, start_from: int) -> Tuple[int, Any]:
+        """Return tuple above position.
 
+        Args:
+            start_from (int): Position
+
+        Returns:
+            Tuple[int, Any]: Tuple with position and item
+        """
         return self._get_at_pos(start_from - 1)
 
-    def _get_at_pos(self, pos):
+    def _get_at_pos(self, pos: int) -> Tuple[int, Any]:
+        """Get item at position.
+
+        Args:
+            pos (int): Number position
+
+        Returns:
+            Tuple[int, Any]: Tuple with position and item
+        """
         if pos < 0:
             return None, None
 
@@ -200,7 +270,16 @@ class ChooseFromListWalker(urwid.ListWalker):
 
         return None, None
 
-    def keypress(self, size, key):
+    def keypress(self, size: int, key: str) -> Any:
+        """Process key pressed
+
+        Args:
+            size (int): Size of the list
+            key (str): Key pressed
+
+        Returns:
+            Any: Default options
+        """
         if (
             key in list(string.ascii_lowercase)
             or key in list(string.digits)
@@ -223,7 +302,15 @@ class ChooseFromListWalker(urwid.ListWalker):
         return key
 
 
-def convert_details_to_columns(details):
+def convert_details_to_columns(details: List[Any]) -> List:
+    """Write on console a list of attributes and values of selection item.
+
+    Args:
+        details (List[Any]): List of detail
+
+    Returns:
+        List: Two columns with the converted text.
+    """
     labels = []
     data = []
     for detail in details:
@@ -243,7 +330,7 @@ def convert_details_to_columns(details):
 
 
 class RefreshableItems:
-    def __init__(self, retrieval_method, method_args):
+    def __init__(self, retrieval_method: Callable[..., Any], method_args):
         self.retrieval_method = retrieval_method
         self.method_args = method_args
         results = self.retrieval_method(*self.method_args)
@@ -263,35 +350,55 @@ class RefreshableItems:
 
 
 class DateTimeEncoder(json.JSONEncoder):
-    def default(self, o):
+    """DateTime Enconder for json."""
+
+    def default(self, o: Any) -> str:
+        """Method to encode data time
+
+        Args:
+            o ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         if isinstance(o, datetime):
             return o.isoformat()
         return json.JSONEncoder.default(self, o)
 
 
 class DetailListBox(urwid.ListBox):
-    def __init__(self, body, controller):
+    """List Box for ECS objects details."""
+
+    def __init__(self, body: Any, controller: Any):
         self.controller = controller
         super(DetailListBox, self).__init__(body)
 
-    def keypress(self, size, key):
+    def keypress(self, size: int, key: str) -> Any:
         if key == "B":
             self.controller.toggle_detail(self)
         else:
             super(DetailListBox, self).keypress(size, key)
 
 
-def exit_on_cr(key):
+def exit_on_cr(key: str) -> None:
+    """Exit when Q key is pressed
+
+    Args:
+        key (str): Key pressed
+
+    Raises:
+        urwid.ExitMainLoop: [description]
+    """
     if isinstance(key, str) and key in "Q":
         raise urwid.ExitMainLoop()
 
 
-PALETTE = [
+PALETTE: Final = [
     ("title", "yellow", "dark blue"),
     ("reveal focus", "black", "white"),
     ("key", "yellow", "dark blue", ("standout", "underline")),
 ]
-FOOTER = urwid.AttrMap(
+FOOTER: Final = urwid.AttrMap(
     urwid.Text(
         u"Press 'U' to update, '<enter>' to look at sub-resources,'D' to look at more detail, 'B' to go back to "
         u"the previous page and 'Q' to quit"
@@ -300,7 +407,12 @@ FOOTER = urwid.AttrMap(
 )
 
 
-def retrieve_clusters():
+def retrieve_clusters() -> UrwidData:
+    """Get a list of cluster from ECS.
+
+    Returns:
+        UrwidData: Dict with str and list of clusters
+    """
     return (
         "Clusters",
         [
@@ -310,16 +422,13 @@ def retrieve_clusters():
     )
 
 
-BODY_CONTROLLER = BodyController(RefreshableItems(retrieve_clusters, []))
+BODY_CONTROLLER: Final = BodyController(RefreshableItems(retrieve_clusters, []))
 
 
-LAYOUT = urwid.Frame(body=BODY_CONTROLLER.body, footer=FOOTER)
+LAYOUT: Final = urwid.Frame(body=BODY_CONTROLLER.body, footer=FOOTER)
 
 
-def main_gui():
+def main_gui() -> Any:
+    """Main function to start urwid user interface."""
     main_loop = urwid.MainLoop(LAYOUT, palette=PALETTE, unhandled_input=exit_on_cr)
     main_loop.run()
-
-
-if __name__ == "__main__":
-    main_gui()
