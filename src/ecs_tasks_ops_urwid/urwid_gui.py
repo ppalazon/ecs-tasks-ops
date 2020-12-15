@@ -23,6 +23,7 @@ class BodyController(object):
     EMPTY_FILTER_TEXT = "< start typing to filter the results >"
 
     def __init__(self, initial_buttons):
+        """Constructor."""
         self.list_stack = [initial_buttons]
         self.all_styled_buttons = [
             urwid.AttrMap(b, None, "reveal focus") for b in initial_buttons.items
@@ -173,6 +174,8 @@ class BodyController(object):
 
 
 class ChooseFromListBox(urwid.ListBox):
+    """Urwid widget for list."""
+
     def keypress(self, size: int, key: str) -> Any:
         """Process key pressed on item.
 
@@ -192,6 +195,7 @@ class ChooseFromListWalker(urwid.ListWalker):
     """List ECS Elements."""
 
     def __init__(self, data: Any, controller: Any):
+        """Constructor."""
         self.all_line = data
         self.lines = data
         self.focus: int = 0
@@ -330,7 +334,10 @@ def convert_details_to_columns(details: List[Any]) -> List:
 
 
 class RefreshableItems:
+    """Refresable Items."""
+
     def __init__(self, retrieval_method: Callable[..., Any], method_args):
+        """Constructor."""
         self.retrieval_method = retrieval_method
         self.method_args = method_args
         results = self.retrieval_method(*self.method_args)
@@ -341,6 +348,7 @@ class RefreshableItems:
             self.items_title, self.items, self.highlighted = results
 
     def refresh(self):
+        """Refresh method."""
         results = self.retrieval_method(*self.method_args)
         if results and len(results) == 2:
             self.items_title, self.items = results
@@ -370,10 +378,12 @@ class DetailListBox(urwid.ListBox):
     """List Box for ECS objects details."""
 
     def __init__(self, body: Any, controller: Any):
+        """Constructor."""
         self.controller = controller
         super(DetailListBox, self).__init__(body)
 
     def keypress(self, size: int, key: str) -> Any:
+        """Process key pressed."""
         if key == "B":
             self.controller.toggle_detail(self)
         else:

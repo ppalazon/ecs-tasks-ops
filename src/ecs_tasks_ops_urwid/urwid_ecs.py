@@ -1,6 +1,5 @@
 """Urwid data conversor from ECS facade."""
 from typing import Any
-from typing import Dict
 from typing import List
 from typing import Tuple
 

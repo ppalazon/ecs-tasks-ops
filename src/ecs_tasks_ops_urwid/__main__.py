@@ -1,4 +1,4 @@
-"""Intialization of ECS Tasks Operations qt5 UI"""
+"""Intialization of ECS Tasks Operations qt5 UI."""
 import click
 
 from ecs_tasks_ops_urwid import urwid_gui
