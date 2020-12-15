@@ -10,8 +10,11 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 
-class Ui_about_dialog(object):
+class UiAboutDialog(object):
+    """Widget class for about dialog."""
+
     def setupUi(self, about_dialog):
+        """Setup UI widgets."""
         about_dialog.setObjectName("about_dialog")
         about_dialog.resize(403, 246)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(about_dialog)
@@ -56,6 +59,7 @@ class Ui_about_dialog(object):
         QtCore.QMetaObject.connectSlotsByName(about_dialog)
 
     def retranslateUi(self, about_dialog):
+        """Translate widgets."""
         _translate = QtCore.QCoreApplication.translate
         about_dialog.setWindowTitle(_translate("about_dialog", "Dialog"))
         self.app_name.setText(_translate("about_dialog", "ECS Tasks Operations"))

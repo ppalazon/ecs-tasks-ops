@@ -1,20 +1,15 @@
-"""Qt5 User Interface for ECS Tasks Ops"""
+"""Qt5 User Interface for ECS Tasks Ops."""
 import sys
 
 import pkg_resources
-from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5 import QtWidgets
-from PyQt5 import uic
 
 from ecs_tasks_ops import ecs_conf
-from ecs_tasks_ops import ecs_data
-from ecs_tasks_ops_qt5.about import Ui_about_dialog
-from ecs_tasks_ops_qt5.main_window import Ui_main_window
-from ecs_tasks_ops_qt5.qt5_ecs import ECSClusterTreeItem
+from ecs_tasks_ops_qt5.about import UiAboutDialog
+from ecs_tasks_ops_qt5.main_window import UiMainWindow
 
 
-class AboutDialog(QtWidgets.QDialog, Ui_about_dialog):
+class AboutDialog(QtWidgets.QDialog, UiAboutDialog):
     """About Dialog widget."""
 
     def __init__(self, *args, **kwargs):
@@ -26,7 +21,7 @@ class AboutDialog(QtWidgets.QDialog, Ui_about_dialog):
         self.version.setText(f"Version: {version}")
 
 
-class MainWindow(QtWidgets.QMainWindow, Ui_main_window):
+class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
     """Main Window for this application."""
 
     def __init__(self, *args, obj=None, **kwargs):

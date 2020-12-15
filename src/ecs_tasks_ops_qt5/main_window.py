@@ -10,8 +10,11 @@ from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 
 
-class Ui_main_window(object):
+class UiMainWindow(object):
+    """Widget composition for application."""
+
     def setupUi(self, main_window):
+        """Inialization."""
         main_window.setObjectName("main_window")
         main_window.resize(800, 600)
         self.centralwidget = QtWidgets.QWidget(main_window)
@@ -68,6 +71,7 @@ class Ui_main_window(object):
         QtCore.QMetaObject.connectSlotsByName(main_window)
 
     def retranslateUi(self, main_window):
+        """Translate widget."""
         _translate = QtCore.QCoreApplication.translate
         main_window.setWindowTitle(_translate("main_window", "MainWindow"))
         self.ecs_elements.headerItem().setText(

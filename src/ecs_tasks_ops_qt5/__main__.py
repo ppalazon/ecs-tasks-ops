@@ -1,4 +1,4 @@
-"""Qt5 UI Initialization"""
+"""Qt5 UI Initialization."""
 import click
 
 from ecs_tasks_ops import ecs_conf

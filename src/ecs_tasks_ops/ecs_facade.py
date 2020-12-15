@@ -129,14 +129,14 @@ def get_all_tasks_container(cluster_name, container_arn):
 
 
 def stop_task(cluster_name, task_arn, reason=""):
-    """Stop a specific task"""
+    """Stop a specific task."""
     return ecs_client.stop_task(cluster=cluster_name, task=task_arn, reason=reason).get(
         "task", {}
     )
 
 
 def restart_service(cluster_name, service_arn, force_new_deployment=False):
-    """Stop a specific task"""
+    """Stop a specific task."""
     return ecs_client.update_service(
         cluster=cluster_name,
         service=service_arn,
