@@ -3,8 +3,8 @@ import click
 
 from ecs_tasks_ops import ecs_data
 from ecs_tasks_ops import ecs_facade
+from ecs_tasks_ops import pretty_json
 from ecs_tasks_ops import pretty_table
-from ecs_tasks_ops.pretty_json import get_pretty_json_str
 
 
 @click.group()
@@ -28,7 +28,7 @@ def main_clusters(ctx):
         click.secho("Getting list of ECS cluster", fg="green")
     clusters = ecs_data.get_clusters()
     if ctx.obj["OUT_JSON"]:
-        click.echo(get_pretty_json_str(clusters))
+        click.echo(pretty_json.dumps(clusters))
     else:
         click.echo(pretty_table.tabulate_list_json(clusters, fields_to=7))
 
@@ -42,7 +42,7 @@ def main_services(ctx, cluster_name):
     try:
         services_info = ecs_data.get_services(cluster_name)
         if ctx.obj["OUT_JSON"]:
-            click.echo(get_pretty_json_str(services_info))
+            click.echo(pretty_json.dumps(services_info))
         else:
             click.echo(
                 pretty_table.tabulate_list_json_keys(
@@ -57,7 +57,7 @@ def main_services(ctx, cluster_name):
                 )
             )
 
-    except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
+    except ecs_facade.ecs_client().exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
 
@@ -71,7 +71,7 @@ def main_container_instances(ctx, cluster_name):
     try:
         container_instances_info = ecs_data.get_containers_instances(cluster_name)
         if ctx.obj["OUT_JSON"]:
-            click.echo(get_pretty_json_str(container_instances_info))
+            click.echo(pretty_json.dumps(container_instances_info))
         else:
             click.echo(
                 pretty_table.tabulate_list_json_keys(
@@ -79,7 +79,7 @@ def main_container_instances(ctx, cluster_name):
                 )
             )
 
-    except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
+    except ecs_facade.ecs_client().exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
 
@@ -111,7 +111,7 @@ def main_tasks(ctx, cluster_name, service_name, container_instance):
             )
 
         if ctx.obj["OUT_JSON"]:
-            click.echo(get_pretty_json_str(tasks_info))
+            click.echo(pretty_json.dumps(tasks_info))
         else:
             click.echo(
                 pretty_table.tabulate_list_json_keys(
@@ -129,7 +129,7 @@ def main_tasks(ctx, cluster_name, service_name, container_instance):
                 )
             )
 
-    except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
+    except ecs_facade.ecs_client().exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
 
@@ -152,7 +152,7 @@ def main_containers(ctx, cluster_name, service_name, docker_name):
             containers_info = [c for c in containers_info if c["name"] == docker_name]
 
         if ctx.obj["OUT_JSON"]:
-            click.echo(get_pretty_json_str(containers_info))
+            click.echo(pretty_json.dumps(containers_info))
         else:
             click.echo(
                 pretty_table.tabulate_list_json_keys(
@@ -170,7 +170,7 @@ def main_containers(ctx, cluster_name, service_name, docker_name):
                 )
             )
 
-    except ecs_facade.ecs_client.exceptions.ClusterNotFoundException:
+    except ecs_facade.ecs_client().exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
 

@@ -15,6 +15,6 @@ class DateTimeEncoder(JSONEncoder):
             return obj.isoformat()
 
 
-def get_pretty_json_str(obj, indent=2):
+def dumps(obj, indent=2):
     """Print the json object."""
     return json.dumps(obj, indent=indent, cls=DateTimeEncoder)

@@ -3,12 +3,17 @@ from itertools import chain
 
 import boto3
 
-ecs_client = boto3.client("ecs")
+# ecs_client = boto3.client("ecs")
+
+
+def ecs_client():
+    """Get ecs client."""
+    return boto3.client("ecs")
 
 
 def get_ecs_list(operation_name, response_attribute, **operation_params):
     """Get a complete list of elements by operation_name."""
-    paginator = ecs_client.get_paginator(operation_name)
+    paginator = ecs_client().get_paginator(operation_name)
     operation_params["PaginationConfig"] = {"MaxItems": 100}
     paginator_ite = paginator.paginate(**operation_params)
     return list(
@@ -21,28 +26,36 @@ def get_ecs_list(operation_name, response_attribute, **operation_params):
 def get_cluster_list():
     """Get a complete list with cluster information."""
     list_clusters = get_ecs_list("list_clusters", "clusterArns")
-    return ecs_client.describe_clusters(clusters=list_clusters).get("clusters", [])
+    return ecs_client().describe_clusters(clusters=list_clusters).get("clusters", [])
 
 
 def get_describe_services(cluster_name, services_arns):
     """Get information about a list of services arns."""
-    return ecs_client.describe_services(
-        cluster=cluster_name, services=services_arns
-    ).get("services", [])
+    return (
+        ecs_client()
+        .describe_services(cluster=cluster_name, services=services_arns)
+        .get("services", [])
+    )
 
 
 def get_describe_tasks(cluster_name, tasks_arns):
     """Get information about a list of tasks."""
-    return ecs_client.describe_tasks(cluster=cluster_name, tasks=tasks_arns).get(
-        "tasks", []
+    return (
+        ecs_client()
+        .describe_tasks(cluster=cluster_name, tasks=tasks_arns)
+        .get("tasks", [])
     )
 
 
 def get_describe_container_instances(cluster_name, container_instances_arns):
     """Get information about a list of container instances."""
-    return ecs_client.describe_container_instances(
-        cluster=cluster_name, containerInstances=container_instances_arns
-    ).get("containerInstances", [])
+    return (
+        ecs_client()
+        .describe_container_instances(
+            cluster=cluster_name, containerInstances=container_instances_arns
+        )
+        .get("containerInstances", [])
+    )
 
 
 def get_all_services(cluster_name):
@@ -130,15 +143,21 @@ def get_all_tasks_container(cluster_name, container_arn):
 
 def stop_task(cluster_name, task_arn, reason=""):
     """Stop a specific task."""
-    return ecs_client.stop_task(cluster=cluster_name, task=task_arn, reason=reason).get(
-        "task", {}
+    return (
+        ecs_client()
+        .stop_task(cluster=cluster_name, task=task_arn, reason=reason)
+        .get("task", {})
     )
 
 
 def restart_service(cluster_name, service_arn, force_new_deployment=False):
     """Stop a specific task."""
-    return ecs_client.update_service(
-        cluster=cluster_name,
-        service=service_arn,
-        forceNewDeployment=force_new_deployment,
-    ).get("service", {})
+    return (
+        ecs_client()
+        .update_service(
+            cluster=cluster_name,
+            service=service_arn,
+            forceNewDeployment=force_new_deployment,
+        )
+        .get("service", {})
+    )
