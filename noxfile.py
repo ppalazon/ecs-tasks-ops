@@ -43,7 +43,7 @@ class Poetry:
                 "poetry",
                 "export",
                 *args,
-                "--format=requirements.txt",
+                "" "--format=requirements.txt",
                 f"--output={requirements}",
                 external=True,
             )
@@ -83,7 +83,7 @@ def install_package(session: Session) -> None:
     """
     poetry = Poetry(session)
 
-    with poetry.export() as requirements:
+    with poetry.export("--without-hashes") as requirements:
         session.install(f"--requirement={requirements}")
 
     poetry.build("--format=wheel")
