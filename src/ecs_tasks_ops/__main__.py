@@ -24,8 +24,6 @@ def main(ctx, debug, output_json) -> None:
 @click.pass_context
 def main_clusters(ctx):
     """Clusters information."""
-    if not ctx.obj["OUT_JSON"]:
-        click.secho("Getting list of ECS cluster", fg="green")
     clusters = ecs_data.get_clusters()
     if ctx.obj["OUT_JSON"]:
         click.echo(pretty_json.dumps(clusters))
@@ -38,7 +36,6 @@ def main_clusters(ctx):
 @click.pass_context
 def main_services(ctx, cluster_name):
     """Services defined in a cluster."""
-    click.secho(f"Getting list of Services for '{cluster_name}'", fg="green")
     try:
         services_info = ecs_data.get_services(cluster_name)
         if ctx.obj["OUT_JSON"]:
@@ -60,6 +57,9 @@ def main_services(ctx, cluster_name):
     except ecs_facade.ecs_client().exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
+    except Exception:
+        click.secho("There has been an error.", fg="red")
+        return []
 
 
 @main.command("container-instances")
@@ -67,7 +67,6 @@ def main_services(ctx, cluster_name):
 @click.pass_context
 def main_container_instances(ctx, cluster_name):
     """Container instances defined in a cluster."""
-    click.secho(f"Getting list of Container instances for '{cluster_name}'", fg="green")
     try:
         container_instances_info = ecs_data.get_containers_instances(cluster_name)
         if ctx.obj["OUT_JSON"]:
@@ -82,6 +81,9 @@ def main_container_instances(ctx, cluster_name):
     except ecs_facade.ecs_client().exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
+    except Exception:
+        click.secho("There has been an error.", fg="red")
+        return []
 
 
 @main.command("tasks")
@@ -93,19 +95,10 @@ def main_tasks(ctx, cluster_name, service_name, container_instance):
     """Set tasks defined in a cluster."""
     try:
         if not service_name and not container_instance:
-            click.secho(f"Getting list of Tasks on '{cluster_name}'", fg="green")
             tasks_info = ecs_data.get_tasks_cluster(cluster_name)
         elif service_name:
-            click.secho(
-                f"Getting list of Tasks on '{cluster_name}' for '{service_name}'",
-                fg="green",
-            )
             tasks_info = ecs_data.get_tasks_service(cluster_name, service_name)
         elif container_instance:
-            click.secho(
-                f"Getting list of Tasks on '{cluster_name}' for '{container_instance}'",
-                fg="green",
-            )
             tasks_info = ecs_data.get_tasks_container_instance(
                 cluster_name, container_instance
             )
@@ -132,19 +125,18 @@ def main_tasks(ctx, cluster_name, service_name, container_instance):
     except ecs_facade.ecs_client().exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
         return []
+    except Exception:
+        click.secho("There has been an error.", fg="red")
+        return []
 
 
 @main.command("containers")
 @click.option("-c", "--cluster-name", default="default", help="Cluster name")
-@click.option("-s", "--service-name", default="", help="Service name")
+@click.option("-s", "--service-name", help="Service name", required=True)
 @click.option("-d", "--docker-name", help="Docker container name")
 @click.pass_context
 def main_containers(ctx, cluster_name, service_name, docker_name):
     """Get docker containers defined in a cluster."""
-    click.secho(
-        f"Getting docker containers on '{cluster_name}' for '{service_name}'",
-        fg="green",
-    )
     try:
         containers_info = ecs_data.get_containers_service(cluster_name, service_name)
 
@@ -172,6 +164,12 @@ def main_containers(ctx, cluster_name, service_name, docker_name):
 
     except ecs_facade.ecs_client().exceptions.ClusterNotFoundException:
         click.secho(f"Cluster {cluster_name} not found", fg="red")
+        return []
+    except ecs_facade.ecs_client().exceptions.ServiceNotFoundException:
+        click.secho(f"Service {service_name} not found", fg="red")
+        return []
+    except Exception:
+        click.secho("There has been an error.", fg="red")
         return []
 
 

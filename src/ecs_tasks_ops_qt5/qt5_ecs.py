@@ -544,9 +544,7 @@ class ECSTabView(QtWidgets.QTabWidget):
     def show_detail(self, item):
         """Show json info of a ecs element."""
         if item and item.detail and isinstance(item, ECSTreeItem):
-            tab_id = self.addTab(
-                ShowResult(pretty_json.get_pretty_json_str(item.detail)), item.name
-            )
+            tab_id = self.addTab(ShowResult(pretty_json.dumps(item.detail)), item.name)
             self.setCurrentIndex(tab_id)
 
     @QtCore.pyqtSlot(QtWidgets.QTreeWidgetItem)
@@ -582,7 +580,7 @@ class ECSTabView(QtWidgets.QTabWidget):
             item.cluster_identifier, item.identifier, "Stopped from ECS Taks Operations"
         )
         tab_id = self.addTab(
-            ShowResult(pretty_json.get_pretty_json_str(task_stopped)),
+            ShowResult(pretty_json.dumps(task_stopped)),
             f"Stopping {item.name}",
         )
         self.setCurrentIndex(tab_id)
@@ -605,7 +603,7 @@ class ECSTabView(QtWidgets.QTabWidget):
             item.cluster_identifier, item.identifier, True
         )
         tab_id = self.addTab(
-            ShowResult(pretty_json.get_pretty_json_str(service_restarted)),
+            ShowResult(pretty_json.dumps(service_restarted)),
             f"Force Restart {item.name}",
         )
         self.setCurrentIndex(tab_id)
