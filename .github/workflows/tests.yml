@@ -124,10 +124,10 @@ jobs:
           pip install --constraint=.github/workflows/constraints.txt nox nox-poetry
           nox --version
 
-      # - name: Download coverage data
-      #   uses: actions/download-artifact@v2.0.5
-      #   with:
-      #     name: coverage-data
+      - name: Download coverage data
+        uses: actions/download-artifact@v2.0.5
+        with:
+          name: coverage-data
 
       - name: Combine coverage data and display human readable report
         run: |
