@@ -229,7 +229,6 @@ def coverage(session: Session) -> None:
         session.run("coverage", "combine")
 
     session.run("coverage", *args)
-    session.run("codecov", *session.posargs)
 
 
 @nox.session(python=python_versions)
