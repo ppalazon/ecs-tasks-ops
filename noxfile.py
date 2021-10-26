@@ -229,6 +229,7 @@ def coverage(session: Session) -> None:
         session.run("coverage", "combine")
 
     session.run("coverage", *args)
+    session.run("codecov", *session.posargs)
 
 
 @nox.session(python=python_versions)
@@ -261,7 +262,7 @@ def docs(session: Session) -> None:
         shutil.rmtree(builddir)
 
     install_package(session)
-    install(session, "sphinx", "sphinx-autobuild")
+    install(session, "sphinx", "sphinx-autobuild", "sphinx-autodoc-typehints")
 
     if session.interactive:
         session.run("sphinx-autobuild", *args)
