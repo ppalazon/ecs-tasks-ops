@@ -25,10 +25,11 @@ jobs:
           # - { python-version: 3.9, os: macos-latest, session: "tests" }
           - { python-version: 3.9, os: ubuntu-latest, session: "typeguard" }
           - { python-version: 3.9, os: ubuntu-latest, session: "xdoctest" }
-          - { python-version: 3.9, os: ubuntu-latest, session: "docs-build" }
+          - { python-version: 3.9, os: ubuntu-latest, session: "docs" }
 
     env:
       NOXSESSION: ${{ matrix.session }}
+      AWS_DEFAULT_REGION: "us-west-2"
 
     steps:
       - name: Check out the repository
@@ -90,7 +91,7 @@ jobs:
           path: ".coverage.*"
 
       - name: Upload documentation
-        if: matrix.session == 'docs-build'
+        if: matrix.session == 'docs'
         uses: actions/upload-artifact@v2.2.0
         with:
           name: docs
