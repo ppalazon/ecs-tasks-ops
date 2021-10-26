@@ -1,4 +1,4 @@
-Ecs Tasks Ops
+ECS Tasks Ops
 =============
 
 |PyPI| |Python Version| |License|
@@ -36,13 +36,24 @@ Ecs Tasks Ops
 Features
 --------
 
-* TODO
-
+* Application GUI to manage ECS resources
+* Use your home aws credentials from ~/.aws/credentials
+* Get information and attributes for each task, service or instance container
+* Connect through SSH to container instances or docker container
+* Show logs for each docker container
+* Show ECS events for a service
+* Force restart for a service
 
 Requirements
 ------------
 
-* TODO
+* Python 3.9
+* `boto3 <https://pypi.org/project/boto3/>`_
+* `click <https://pypi.org/project/click/>`_
+* `tabulate <https://pypi.org/project/tabulate/>`_
+* `PyQt5 <https://pypi.org/project/PyQt5/>`_
+* `moto <https://pypi.org/project/moto/>`_
+* uxrvt
 
 
 Installation
@@ -55,11 +66,77 @@ You can install *Ecs Tasks Ops* via pip_ from PyPI_:
    $ pip install ecs-tasks-ops
 
 
-Usage
------
+Configuration
+-------------
 
-* TODO
+AWS Access
+^^^^^^^^^^
 
+This application uses your aws credentials to connect to your ECS, so you need to configure your credentials.
+
+Set up credentials (in e.g. ``~/.aws/credentials``)
+
+.. code:: ini
+
+   [default]
+   aws_access_key_id = YOUR_KEY
+   aws_secret_access_key = YOUR_SECRET
+
+Then, you set up a default region (in e.g. ``~/.aws/config``)
+
+.. code:: ini
+
+   [default]
+   region=us-east-1
+
+You can read more about it in `boto3 <https://pypi.org/project/boto3/>`_
+
+``ssh`` over ``ssm``
+^^^^^^^^^^^^^^^^^^^^
+
+If you want to access to containers instances or docker container through ``ssh``, you must configurate ``ssm`` in your EC2 machines.
+That's because ``ecs-tasks-ops`` use its instance id as machine identifier on ``ssh`` command. For example, ``ssh i-0123456789ABCDE``.
+I use `ssh-over-ssm <https://github.com/elpy1/ssh-over-ssm>`_ tool to configure ``ssh`` over ``ssm`` to connect to instances.
+
+GUI Usage
+---------
+
+You can open the ``qt5`` application, using the following command
+
+.. code:: console
+
+   ecs-tasks-ops-qt5
+
+CLI Usage
+---------
+
+You can open the command line with ``ecs-tasks-ops`` command. This is the help menu:
+
+.. code::
+
+   Usage: ecs-tasks-ops [OPTIONS] COMMAND [ARGS]...
+
+      Ecs Tasks Ops.
+
+   Options:
+      -x, --debug / --no-debug
+      -j, --output-json
+      --version                 Show the version and exit.
+      --help                    Show this message and exit.
+
+   Commands:
+      clusters             Clusters information.
+      container-instances  Container instances defined in a cluster.
+      containers           Get docker containers defined in a cluster.
+      services             Services defined in a cluster.
+      tasks                Set tasks defined in a cluster.
+
+By default, the output format is in a table, but you can get original ``json`` format with ``-j`` option.
+You can filter json output with `jq <https://stedolan.github.io/jq/>`_ tool:
+
+.. code:: console
+
+   $ ecs-tasks-ops -j clusters | jq "."
 
 Contributing
 ------------
