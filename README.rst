@@ -22,7 +22,7 @@ ECS Tasks Ops
 .. |Tests| image:: https://github.com/ppalazon/ecs-tasks-ops/workflows/Tests/badge.svg
    :target: https://github.com/ppalazon/ecs-tasks-ops/actions?workflow=Tests
    :alt: Tests
-.. |Codecov| image:: https://codecov.io/gh/ppalazon/ecs-tasks-ops/branch/master/graph/badge.svg
+.. |Codecov| image:: https://codecov.io/gh/ppalazon/ecs-tasks-ops/branch/main/graph/badge.svg?token=zaz1KPR73Q
    :target: https://codecov.io/gh/ppalazon/ecs-tasks-ops
    :alt: Codecov
 .. |pre-commit| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
