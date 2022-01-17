@@ -47,7 +47,7 @@ Features
 Requirements
 ------------
 
-* Python 3.9
+* Python 3.10
 * `boto3 <https://pypi.org/project/boto3/>`_
 * `click <https://pypi.org/project/click/>`_
 * `tabulate <https://pypi.org/project/tabulate/>`_
