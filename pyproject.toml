@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ecs-tasks-ops"
-version = "0.2.0"
+version = "0.3.0"
 description = "Ecs Tasks Ops"
 authors = ["Pablo Palazon <ppalazon@antara.ws>"]
 license = "MIT"
