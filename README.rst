@@ -98,6 +98,25 @@ If you want to access to containers instances or docker container through ``ssh`
 That's because ``ecs-tasks-ops`` use its instance id as machine identifier on ``ssh`` command. For example, ``ssh i-0123456789ABCDE``.
 I use `ssh-over-ssm <https://github.com/elpy1/ssh-over-ssm>`_ tool to configure ``ssh`` over ``ssm`` to connect to instances.
 
+Predefined Commands
+^^^^^^^^^^^^^^^^^^^
+
+You can set multiples predefined commands to execute on docker containers. You can set them in a configuration file called ``ecs-tasks-ops.json``.
+This file can be located on ``~``, ``~/.config/ecs-tasks-ops``, ``/etc/ecs-tasks-ops``, or any directory configured in the enviromental variable
+``ECS_TASKS_OPS_CONF``
+
+Sample configuration
+
+.. code-block:: json
+
+   {
+      "commands": [
+         "/bin/sh",
+         "/bin/bash",
+         "mongo admin -u root -p $(pass mongo/root)"
+      ]
+   }
+
 GUI Usage
 ---------
 
