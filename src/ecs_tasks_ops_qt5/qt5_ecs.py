@@ -237,7 +237,7 @@ class ECSTaskTreeItem(ECSTreeItem):
             ("Desired Status", self.detail["desiredStatus"]),
             ("EC2 Instance", self.detail["ec2InstanceId"]),
             ("Availability Zone", self.detail["availabilityZone"]),
-            ("Connectivity", self.detail["connectivity"]),
+            ("Connectivity", self.detail.get("connectivity", "")),
             ("Task Definition", self.detail["taskDefinitionArn"]),
             (
                 "Container Instance ID",
