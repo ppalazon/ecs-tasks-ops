@@ -110,6 +110,7 @@ def main_tasks(ctx, cluster_name, service_name, container_instance):
                 pretty_table.tabulate_list_json_keys(
                     tasks_info,
                     [
+                        "name",
                         "taskArn",
                         "ec2InstanceId",
                         "availabilityZone",

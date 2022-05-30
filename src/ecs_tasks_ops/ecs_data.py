@@ -6,44 +6,59 @@ from ecs_tasks_ops import ecs_facade
 
 def get_clusters():
     """Get a complete list of clusters."""
-    return ecs_facade.get_cluster_list()
+    return sorted(ecs_facade.get_cluster_list(), key=lambda x: x["clusterName"])
 
 
 def get_services(cluster_name):
     """Get a complete list of services by cluster."""
-    return ecs_facade.get_all_services(cluster_name)
+    return sorted(
+        ecs_facade.get_all_services(cluster_name), key=lambda x: x["serviceName"]
+    )
 
 
 def get_containers_instances(cluster_name):
     """Get a complete list of container instances by cluster."""
-    return __improve_container_instance_info(cluster_name)
+    return sorted(
+        __improve_container_instance_info(cluster_name),
+        key=lambda x: x["ec2InstanceId"],
+    )
 
 
 def get_tasks_cluster(cluster_name):
     """Get a complete list of task by cluster."""
-    return __improve_cluster_tasks_info(cluster_name)
+    return sorted(__improve_cluster_tasks_info(cluster_name), key=lambda x: x["name"])
 
 
 def get_tasks_service(cluster_name, service_name):
     """Get a complete list of services by clusters."""
-    return __improve_service_tasks_info(cluster_name, service_name)
+    return sorted(
+        __improve_service_tasks_info(cluster_name, service_name),
+        key=lambda x: x["name"],
+    )
 
 
 def get_tasks_container_instance(cluster_name, containers_instance_arn):
     """Get a complete info for a container instance in a cluster."""
-    return __improve_container_instance_tasks_info(
-        cluster_name, containers_instance_arn
+    return sorted(
+        __improve_container_instance_tasks_info(cluster_name, containers_instance_arn),
+        key=lambda x: x["name"],
     )
 
 
 def get_containers_service(cluster_name, service_name):
     """Get a list of docker containers by a service and cluster."""
-    return __improve_docker_container_info(cluster_name, service_name)
+    return sorted(
+        __improve_docker_container_info(cluster_name, service_name),
+        key=lambda x: x["name"],
+    )
 
 
 def get_containers_tasks(cluster_name, task_arn):
     """Get a list of docker containers by task."""
-    return __improve_docker_container_task_info(cluster_name, task_arn)
+    return sorted(
+        __improve_docker_container_task_info(cluster_name, task_arn),
+        key=lambda x: x["name"],
+    )
 
 
 def __improve_container_instance_info(cluster_name):
