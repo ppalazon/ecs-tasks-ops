@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ecs-tasks-ops"
-version = "0.4.0"
+version = "0.5.0"
 description = "Ecs Tasks Ops"
 authors = ["Pablo Palazon <ppalazon@antara.ws>"]
 license = "MIT"
@@ -52,7 +52,6 @@ sphinx-click = "^3.0.1"
 Pygments = "^2.7.2"
 nox-poetry = "^0.8.6"
 rope = "^1.0.0"
-pylint = "^2.6.0"
 pytest-cov = "^3.0.0"
 rstcheck = "^3.3.1"
 sphinx-autodoc-typehints = "^1.12.0"
