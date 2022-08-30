@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ecs-tasks-ops"
-version = "0.7.0"
+version = "0.7.1"
 description = "Ecs Tasks Ops"
 authors = ["Pablo Palazon <ppalazon@antara.ws>"]
 license = "MIT"
@@ -72,6 +72,6 @@ source = ["ecs_tasks_ops"]
 show_missing = true
 fail_under = 0
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+# [build-system]
+# requires = ["poetry>=0.12"]
+# build-backend = "poetry.masonry.api"
