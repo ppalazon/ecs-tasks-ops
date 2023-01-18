@@ -1,2 +1,2 @@
 sphinx==5.2.3
-sphinx-autodoc-typehints==1.19.4
+sphinx-autodoc-typehints==1.21.4
