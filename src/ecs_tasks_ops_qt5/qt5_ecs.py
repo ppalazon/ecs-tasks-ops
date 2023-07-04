@@ -7,6 +7,7 @@ from ecs_tasks_ops import ecs_data
 from ecs_tasks_ops import ecs_facade
 from ecs_tasks_ops import ecs_ssh
 from ecs_tasks_ops import pretty_json
+from ecs_tasks_ops_qt5 import terminal
 
 
 class ECSTreeItem(QtWidgets.QTreeWidgetItem):
@@ -88,7 +89,7 @@ class ECSListServicesClusterTreeItem(ECSTreeItem):
     def __init__(self, detail, parent=None):
         """Initilize info to get a list of services for a cluster."""
         super(ECSListServicesClusterTreeItem, self).__init__(
-            name=f"Services on '{detail['clusterName']}'",
+            name=f"Services on '{detail['clusterName']!r}'",
             identifier=detail["clusterName"],
             detail_type="list_services",
             detail=detail,
@@ -108,7 +109,7 @@ class ECSListTasksClusterTreeItem(ECSTreeItem):
     def __init__(self, detail, parent=None):
         """Initialize info to get a list of tasks for a cluster."""
         super(ECSListTasksClusterTreeItem, self).__init__(
-            name=f"Tasks on '{detail['clusterName']}'",
+            name=f"Tasks on '{detail['clusterName']!r}'",
             identifier=detail["clusterName"],
             detail_type="list_services",
             detail=detail,
@@ -128,7 +129,7 @@ class ECSListContainersClusterTreeItem(ECSTreeItem):
     def __init__(self, detail, parent=None):
         """Initialize info to get a list of container instances for a cluster."""
         super(ECSListContainersClusterTreeItem, self).__init__(
-            name=f"Containers on '{detail['clusterName']}'",
+            name=f"Containers on '{detail['clusterName']!r}'",
             identifier=detail["clusterName"],
             detail_type="list_services",
             detail=detail,
@@ -672,14 +673,25 @@ class EmbTerminal(QtWidgets.QWidget):
     def __init__(self, bash_command, parent=None):
         """Initilize parameters and open a terminal."""
         super(EmbTerminal, self).__init__(parent)
-        self.process = QtCore.QProcess(self)
-        self.terminal = QtWidgets.QWidget(self)
+
+        terminal_args = []
+        if bash_command:
+            terminal_args = ["-c", bash_command] + terminal_args
+            # terminal_args = ["-e", "bash", "-c", bash_command] + terminal_args
+        # self.process.start(
+        #     "urxvt", ["-embed", str(int(self.terminal.winId()))] + terminal_args
+        # )
+
+        self.terminal = terminal.TerminalWidget(self)
+        # self.terminal = QtWidgets.QWidget(self)
         self.command = QtWidgets.QLineEdit(self)
         self.command.setReadOnly(True)
         self.command.setText(bash_command)
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.command)
         layout.addWidget(self.terminal)
+
+        self.terminal.start("/bin/bash", ["--norc", "-r"] + terminal_args)
 
         # env = QtCore.QProcessEnvironment.systemEnvironment()
         # env.insert("TERM", "xterm")
@@ -689,16 +701,16 @@ class EmbTerminal(QtWidgets.QWidget):
         # self.process.error.connect(self.log_error)
 
         # Works also with urxvt:
-        terminal_args = []
-        if bash_command:
-            terminal_args = ["-e", "bash", "-c", bash_command] + terminal_args
-        self.process.start(
-            "urxvt", ["-embed", str(int(self.terminal.winId()))] + terminal_args
-        )
+        # terminal_args = []
+        # if bash_command:
+        #     terminal_args = ["-e", "bash", "-c", bash_command] + terminal_args
+        # self.process.start(
+        #     "urxvt", ["-embed", str(int(self.terminal.winId()))] + terminal_args
+        # )
 
     def closeEvent(self, event):
         """Close terminal and process."""
-        self.process.terminate()
+        self.terminal.close()
 
     def log_error(self, error):
         """Show log error information."""

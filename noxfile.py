@@ -12,8 +12,8 @@ from nox.sessions import Session
 
 
 package = "ecs_tasks_ops"
-python_build = "3.10"
-python_versions = ["3.10"]
+python_build = "3.11.4"
+python_versions = ["3.11.4"]
 nox.options.sessions = "pre-commit", "safety", "tests", "typeguard"  # , "mypy"
 
 
@@ -107,8 +107,8 @@ def install(session: Session, *args: str) -> None:
         args: Command-line arguments for ``pip install``.
     """
     poetry = Poetry(session)
-    with poetry.export("--dev", "--without-hashes") as requirements:
-        session.install(f"--constraint={requirements}", *args)
+    with poetry.export("--with", "dev", "--without-hashes") as requirements:
+        session.install(f"--requirement={requirements}", *args)
 
 
 def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
@@ -189,7 +189,7 @@ def precommit(session: Session) -> None:
 def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
     poetry = Poetry(session)
-    with poetry.export("--dev", "--without-hashes") as requirements:
+    with poetry.export("--with", "dev", "--without-hashes") as requirements:
         install(session, "safety")
         session.run("safety", "check", f"--file={requirements}", "--bare")
 

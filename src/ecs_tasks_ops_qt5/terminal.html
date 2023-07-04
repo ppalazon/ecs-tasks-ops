@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      html,
+      body,
+      #terminal-container {
+        min-height: 100% !important;
+        width: 100%;
+        height: 100%;
+      }
+      #terminal-container {
+        background: black;
+      }
+    </style>
+    <link rel="stylesheet" href="xterm.css" />
+    <script src="xterm.js"></script>
+    <script src="xterm-addon-fit.js"></script>
+    <script src="xterm-addon-web-links.js"></script>
+    <script
+      type="text/javascript"
+      src="qrc:///qtwebchannel/qwebchannel.js"
+    ></script>
+    <script type="text/javascript" src="terminal.js"></script>
+  </head>
+  <body>
+    <div id="terminal-container"></div>
+  </body>
+</html>

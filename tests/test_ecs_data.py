@@ -28,8 +28,9 @@ def test_get_clusters_1():
 @mock_ec2
 def test_get_services_def():
     """Test get a list of services."""
-    initialize_ecs_cluster("test-cluster")
-    services = ecs_data.get_services("default")
+    cluster_name = "test-cluster"
+    initialize_ecs_cluster(cluster_name)
+    services = ecs_data.get_services(cluster_name)
     assert len(services) == 0
 
 
